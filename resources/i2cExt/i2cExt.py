@@ -30,15 +30,7 @@ import xml.dom.minidom as minidom
 from optparse import OptionParser
 from os.path import join
 import json
-
-
-# Card Registers
-W_OUTPUT=66 #0x42
-R_OUTPUT=65 #0x41
-R_INPUT=80 #0x50
-W_HBEAT=96 #0x60
-R_HBEAT=97 #0x61
-R_VERSION=144 #0x90
+from collections import namedtuple
 
 # Equipements
 Eqts=[]
@@ -51,6 +43,8 @@ except ImportError:
 
 # ----------------------------------------------------------------------------
 class CARDS(object):
+	Register = namedtuple("Register", "W_OUTPUT R_OUTPUT R_INPUT W_HBEAT R_HBEAT R_VERSION"])
+
 	def __init__(self, _cardAddress,_type):
 		if (not isinstance(_cardAddress, int)):
 			raise TypeError("Should be an integer")	
@@ -61,12 +55,13 @@ class CARDS(object):
 		self.status=self.manageHbeat(0)	
 		self.loss_counter=0	#pas utilise
 		self.version=self.aboutVersion()
+		self._register = self.Register(W_OUTPUT=66, R_OUTPUT=65, R_INPUT=80, W_HBEAT=96, R_HBEAT=97, R_VERSION=144)
 		
 	def manageHbeat(self, hbeat_value):
-		new_hbeat = jeedom_i2c.read(self.address,R_HBEAT)
+		new_hbeat = jeedom_i2c.read(self.address,self._register.R_HBEAT)
 		if(new_hbeat != self.hbeat):
 			self.status = 1 #Communication OK
-			jeedom_i2c.write(self.address,W_HBEAT,hbeat_value)
+			jeedom_i2c.write(self.address,self._register.W_HBEAT,hbeat_value)
 		else:
 			self.status = 0 #Communication KO
 			self.input = 0#self.reply_input
@@ -74,7 +69,7 @@ class CARDS(object):
 		return self.status
 			
 	def aboutVersion(self):
-		self.version = self.readCommand(R_VERSION)
+		self.version = self.readCommand(self._register.R_VERSION)
 		logging.info("The I2C card with the @:" + str(self.address) + " is in the version :" + str(self.version))
 		return self.version
 		
@@ -146,7 +141,7 @@ class IN8R8(CARDS):
 
 	# Read input of the board
 	def readCardInput(self):
-		input=jeedom_i2c.read(self.address,R_INPUT)
+		input=jeedom_i2c.read(self.address,self._register.R_INPUT)
 		#logging.debug("Read input :" + jeedom_utils.dec2bin(input,8) + " for the IN8R8 board @:" + str(self.address))
 		if ((self.input != input)):# & (self.inputChanged==0)):
 			logging.debug("Read new input :" + jeedom_utils.dec2bin(input,8) + " for the IN8R8 board @:" + str(self.address))
@@ -155,7 +150,7 @@ class IN8R8(CARDS):
 			
 	# Read output feedback of the board
 	def readCardOutput(self):
-		routput=jeedom_i2c.read(self.address,R_OUTPUT)
+		routput=jeedom_i2c.read(self.address,self._register.R_OUTPUT)
 		#logging.debug("Read output :" + jeedom_utils.dec2bin(routput,8) + " for the IN8R8 board @:" + str(self.address))
 		if  ((self.routput != routput)):# & (self.routputChanged==0)):
 			logging.debug("Read new output feedback :" + jeedom_utils.dec2bin(routput,8) + " for the IN8R8 board @:" + str(self.address))
@@ -166,7 +161,7 @@ class IN8R8(CARDS):
 	
 	# A deplacer en lib jeedom
 	def write(self):
-		jeedom_i2c.write(self.address,W_OUTPUT,self.output)
+		jeedom_i2c.write(self.address,self._register.W_OUTPUT,self.output)
 		logging.debug("Send output :" + jeedom_utils.dec2bin(self.output,8) + " for the IN8R8 board @:" + str(self.address))
 		#self.outputChanged=0
 	
