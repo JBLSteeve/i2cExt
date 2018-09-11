@@ -1,4 +1,4 @@
-PROGRESS_FILE=/tmp/dependancy_JeePlcBus_in_progress
+PROGRESS_FILE=/tmp/dependancy_i2cExt_in_progress
 if [ ! -z $1 ]; then
 	PROGRESS_FILE=$1
 fi
@@ -10,7 +10,7 @@ echo "*             Installation des dépendances             *"
 echo "********************************************************"
 apt-get update
 echo 50 > ${PROGRESS_FILE}
-apt-get install -y python-serial python-requests python-pyudev
+apt-get install -y python-smbus python-requests python-pyudev
 echo 100 > ${PROGRESS_FILE}
 echo "********************************************************"
 echo "*             Installation terminée                    *"

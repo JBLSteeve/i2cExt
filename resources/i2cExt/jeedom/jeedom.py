@@ -205,6 +205,11 @@ class jeedom_utils():
 		return(int_type & mask)
 
 	@staticmethod
+	def setBit(int_type, offset):
+		mask = 1 << offset
+		return(int_type | mask)
+		
+	@staticmethod
 	def clearBit(int_type, offset):
 		mask = ~(1 << offset)
 		return(int_type & mask)
@@ -229,39 +234,39 @@ class jeedom_utils():
 class jeedom_i2c():
 
 	def __init__(self,port = ''):
-		self.device = None
+		self.bus = None
 		self.port = port
 
 	def open(self):
 		logging.debug("Open i2c bus")
 		try:  
-			self.device=SMBus(_port)
-		except Exception, e:
-			logging.error("Error: Failed to open i2c bus")
+			self.bus = smbus.SMBus(self.port)
+		except:
+			logging.error("Error: Failed to open i2c bus :" + str(self.port))
 
 
 	def close(self):
 		logging.debug("Close i2c bus")
 		try:
-			self.device.close()
+			self.bus.close()
 			logging.debug("i2c bus closed")
 			return True
 		except:
 			logging.error("Failed to close i2c bus port (" + self.port + ")")
 			return False
 		
-	def write(_cardAddress, _command, _value):
+	def write(self,_cardAddress, _command, _value):
 		try:
-			logging.debug("Write I2C data on board @:" + str(_cardAddress) + " command:" + str(_command) + " valeur:" + str(_value))
-			self.device.write_byte_data(int(_cardAddress),int(_command),int(_value))
+			#logging.debug("Write I2C data on board @:" + str(_cardAddress) + " command:" + str(_command) + " valeur:" + str(_value))
+			self.bus.write_byte_data(int(_cardAddress),int(_command),int(_value))
 			return 1
-		except: # exception if I2C read failed
+		except: # exception if I2C write failed
 			return 0
 
-	def read(_cardAddress, _command):
+	def read(self,_cardAddress, _command):
 		try:
-			return self.device.read_byte_data(int(_cardAddress),int(_command))
-			logging.debug("Read I2C data on board @:" + str(_cardAddress) + " command:" + str(_command) + " valeur:" + str(data))
+			return self.bus.read_byte_data(int(_cardAddress),int(_command))
+			#logging.debug("Read I2C data on board @:" + str(_cardAddress) + " command:" + str(_command) + " valeur:" + str(data))
 		except: # exception if I2C read failed
 			return 0
 	
