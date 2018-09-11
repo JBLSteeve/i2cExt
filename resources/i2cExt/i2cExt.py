@@ -186,10 +186,11 @@ def findCardAdress(_address):
 	if len(Eqts) == 0:
 		return -1
 	else :
-		for index in range(len(Eqts)):
-			if Eqts[index].address == _address:
-				return index
-				break
+		for eqt in Eqts:
+			if eqt.address == _address :
+				return eqt
+		else:
+			return None
 		
 # ----------------------------------------------------------------------------			
 def read_socket():
@@ -207,37 +208,35 @@ def read_socket():
 			if message['apikey'] != _apikey:
 				logging.error("Invalid apikey from socket : " + str(message))
 			
-			cardId=findCardAdress(address)
-					
-			if cardId == -1:
+			card=findCardAdress(address)
+
+			if card is None:
 				if message['cmd'] == 'add':
 					logging.debug("Add the device with @:" + str(address)) 
 					Eqts.append(IN8R8(address,board,0))				
-			
 			else:
-				
 				if message['cmd'] == 'receive':
 					if message['type'] == 'input':
-						Eqts[cardId].inputChanged = 0
+						card.inputChanged = 0
 					if message['type'] == 'output':
-						Eqts[cardId].routputChanged = 0
+						card.routputChanged = 0
 					
 				if message['cmd'] == 'remove':
-					logging.debug("Remove the device with @:" + str(Eqts[cardId].address))
+					logging.debug("Remove the device with @:" + str(card.address))
 					Eqts.remove(cardId)
 				
 				if message['cmd'] == 'send':
 					if 'channel' in str(message):
-						for i in range(Eqts[cardId].outputchannel):
+						for i in range(card.outputchannel):
 							if ('channel' + str(i)) in str(message):
-								Eqts[cardId].newSP(i, int(message['channel' + str(i)]))
+								card.newSP(i, int(message['channel' + str(i)]))
 					else:
 						if ((message['output']=='100') | (message['output']=='On') | (message['output']=='ON')):
-							for i in range(Eqts[cardId].outputchannel):
-								Eqts[cardId].newSP(i, 100)
+							for i in range(card.outputchannel):
+								card.newSP(i, 100)
 						else:
-							for i in range(Eqts[cardId].outputchannel):
-								Eqts[cardId].newSP(i, 0)
+							for i in range(card.outputchannel):
+								card.newSP(i, 0)
 			
 	except Exception,e:
 		logging.error('Error on read socket : '+str(e))	
