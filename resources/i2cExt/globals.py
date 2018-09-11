@@ -1,0 +1,2 @@
+JEEDOM_COM = ''
+KNOWN_DEVICES = {}

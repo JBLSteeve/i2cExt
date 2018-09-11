@@ -1,0 +1,23 @@
+== Présentation ==
+Ce plugin permet de gérer les cartes XplDuino avec l'I2C d'un Raspberry ou Odroid.
+
+
+=== Données cartes compatibles sont : ===
+* ''IN8R8''
+* ''''
+
+
+== Installation/Paramétrage ==
+Nous allons maintenant paramétrer un équipement. Pour se faire, cliquer sur ''Plugins / Protocole domotique / i2cExt''
+
+Puis cliquer sur le bouton en haut à gauche ''Ajouter un équipement''
+
+Puis saisir le nom de l'équipement (ex. IN8RO81).
+
+Puis définir :
+
+* ''Objet parent''
+* ''Catégorie'' (optionnelle)
+* ''Activer'' (à cocher, sinon l’équipement ne sera pas utilisable)
+* ''Visible'' (optionel si vous ne désirez pas le rendre visible sur le Dashboard)
+
