@@ -38,13 +38,11 @@ Eqts=[]
 try:
 	from jeedom.jeedom import *
 except ImportError:
-	print "Error: importing module jeedom.jeedom"
+	print("Error: importing module jeedom.jeedom")
 	sys.exit(1)
 
 # ----------------------------------------------------------------------------
 class CARDS(object):
-	Register = namedtuple("Register", "W_OUTPUT R_OUTPUT R_INPUT W_HBEAT R_HBEAT R_VERSION"])
-
 	def __init__(self, _cardAddress,_type):
 		if (not isinstance(_cardAddress, int)):
 			raise TypeError("Should be an integer")	
@@ -55,6 +53,7 @@ class CARDS(object):
 		self.status=self.manageHbeat(0)	
 		self.loss_counter=0	#pas utilise
 		self.version=self.aboutVersion()
+		self.Register = namedtuple("Register", "W_OUTPUT R_OUTPUT R_INPUT W_HBEAT R_HBEAT R_VERSION")
 		self._register = self.Register(W_OUTPUT=66, R_OUTPUT=65, R_INPUT=80, W_HBEAT=96, R_HBEAT=97, R_VERSION=144)
 		
 	def manageHbeat(self, hbeat_value):
@@ -83,17 +82,20 @@ class CARDS(object):
 		return value
 		
 	def clearComIsOK(self):
-		status=0
+		self.status=0
 	
 	def setComIsOK(self):
-		status=1
+		self.status=1
 	
 	def updateOuput(self, _output,_value):
-		if self.output[_output] == _value:
-			return 0
+		if hasattr(self, 'output'):
+			if self.output[_output] == _value:
+				return 0
+			else:
+				self.output[_output] = _value
+				return 1
 		else:
-			self.output[_output] = _value
-			return 1
+			return -1
 # ------------------------------------------------------------------------------
 class IN8R8(CARDS):
 	def __init__(self, _cardAddress,_type,_reply_input):
@@ -184,7 +186,7 @@ class IN4DIM4(CARDS):
 # ------------------------------------------------------------------------------
 def findCardAdress(_address):
 	if len(Eqts) == 0:
-		return -1
+		return None
 	else :
 		for eqt in Eqts:
 			if eqt.address == _address :
@@ -223,7 +225,7 @@ def read_socket():
 					
 				if message['cmd'] == 'remove':
 					logging.debug("Remove the device with @:" + str(card.address))
-					Eqts.remove(cardId)
+					Eqts.remove(card)
 				
 				if message['cmd'] == 'send':
 					if 'channel' in str(message):
@@ -237,9 +239,9 @@ def read_socket():
 						else:
 							for i in range(card.outputchannel):
 								card.newSP(i, 0)
-			
-	except Exception,e:
-		logging.error('Error on read socket : '+str(e))	
+	#Catch all exception and print exception name raised
+	except:
+		logging.error('Error on read socket : '+ sys.exc_info()[0])	
 
 # ----------------------------------------------------------------------------
 def read_i2cbus():
@@ -275,7 +277,7 @@ def write_socket():
 					globals.JEEDOM_COM.add_changes('devices::'+board['address'],board)
 					globals.JEEDOM_COM.add_changes('input::',input)
 					#eqt.inputChanged = 0
-				except Exception, e:
+				except:
 					logging.error("Send to jeedom error for input:" + jeedom_utils.dec2bin(eqt.input,8) + " on board @:" + str(eqt.address))
 			
 			if eqt.routputChanged == 1:
@@ -290,7 +292,7 @@ def write_socket():
 					globals.JEEDOM_COM.add_changes('devices::'+board['address'],board)
 					globals.JEEDOM_COM.add_changes('output::',routput)
 					#eqt.routputChanged = 0
-				except Exception, e:
+				except:
 					logging.error("Send to jeedom error for output feedback:" + jeedom_utils.dec2bin(eqt.routput,8) + " on board @:" + str(eqt.address))
 			
 # ----------------------------------------------------------------------------	
@@ -419,7 +421,7 @@ try:
 	jeedom_i2c = jeedom_i2c(port=_device)
 	jeedom_socket = jeedom_socket(port=_socket_port,address=_socket_host)
 	listen()
-except Exception, e:
-	logging.error('Fatal error : '+str(e))
+except:
+	logging.error('Fatal error : '+sys.exc_info()[0])
 	logging.debug(traceback.format_exc())
 	shutdown()
