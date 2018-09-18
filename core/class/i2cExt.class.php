@@ -42,7 +42,7 @@ class i2cExt extends eqLogic {
 			}
 		}
 		$return['launchable'] = 'ok';
-		/*$port = config::byKey('port', 'i2cExt');
+		/*Todo $port = config::byKey('port', 'i2cExt');
 		if ($port != 'auto') {
 			$port = jeedom::getUsbMapping($port);
 			if (is_string($port)) {
@@ -106,7 +106,7 @@ class i2cExt extends eqLogic {
 			$pid = intval(trim(file_get_contents($pid_file)));
 			system::kill($pid);
 		}
-		system::kill('JeePlcBusd.py');
+		system::kill('i2cExt.py');
 		system::fuserk(config::byKey('socketport', 'i2cExt'));
 		$port = config::byKey('port', 'i2cExt');
 		/*if ($port != 'auto') {
@@ -148,27 +148,6 @@ class i2cExt extends eqLogic {
 	
 	public static function pull() {
 	//Appele toute les secondes scan ou verification status
-	//$cmd="i2cget -y 1 ";
-	//log::add('i2cExt','debug','pull $this->getLogicalId(): '.$this->getLogicalId());
-	//$this->checkAndUpdateCmd($this->getLogicalId(), true);
-	//$cmd.=$eqLogic->getConfiguration('address');
-	//$cmd.="83 0x50";
-	//log::add('i2cExt','debug',$cmd);
-	//$result = shell_exec($cmd);  
-	//log::add('i2cExt','debug',$result);  
-	
-		//$message = trim(json_encode(array('apikey' => jeedom::getApiKey('i2cExt'), 'cmd' => 'send', 'address' => '83', 'registre' => '66', 'data' => '00')));
-		//$message = trim(json_encode(array('apikey' => jeedom::getApiKey('i2cExt'), 'cmd' => 'add','board' => 'IN8R8', 'address' => '83')));
-		//$message = trim(json_encode(array('apikey' => jeedom::getApiKey('i2cExt'), 'cmd' => 'send', 'address' => '83', 'output' => '0', 'value' => '1')));
-
-		//$socket = socket_create(AF_INET, SOCK_STREAM, 0);
-		//socket_connect($socket, '127.0.0.1', config::byKey('socketport', 'i2cExt'));
-		//socket_write($socket, trim($message), strlen(trim($message)));
-		//socket_close($socket);
-		
-		
-		
-		//$message = trim(json_encode(array('apikey' => jeedom::getApiKey('i2cExt'), 'cmd' => 'send', 'address' => '83', 'output' => '1', 'value' => '1')));
 	}
 
 	
@@ -178,19 +157,19 @@ class i2cExt extends eqLogic {
 
 	public function postInsert(){
 		log::add('i2cExt','debug',"function post");
-		$cmd = $this->getCmd(null, 'updatetime');
-		if ( ! is_object($cmd)) {
-			$cmd = new cmd();
-			$cmd->setName('Dernier refresh');
-			$cmd->setEqLogic_id($this->getId());
-			$cmd->setLogicalId('updatetime');
-			$cmd->setUnite('');
-			$cmd->setType('info');
-			$cmd->setSubType('string');
-			$cmd->setIsHistorized(0);
-			$cmd->setEventOnly(1);
-			$cmd->setDisplay('generic_type','GENERIC_INFO');
-			$cmd->save();		
+		$i2cExtcmd = $this->getCmd(null, 'updatetime');
+		if ( ! is_object($i2cExtcmd)) {
+			$i2cExtcmd = new i2cExtcmd();
+			$i2cExtcmd->setName('Dernier refresh');
+			$i2cExtcmd->setEqLogic_id($this->getId());
+			$i2cExtcmd->setLogicalId('updatetime');
+			$i2cExtcmd->setUnite('');
+			$i2cExtcmd->setType('info');
+			$i2cExtcmd->setSubType('string');
+			$i2cExtcmd->setIsHistorized(0);
+			$i2cExtcmd->setEventOnly(1);
+			$i2cExtcmd->setDisplay('generic_type','GENERIC_INFO');
+			$i2cExtcmd->save();		
 		}
 		$cmd = $this->getCmd(null, 'status');
 		if ( ! is_object($cmd) ) {
@@ -255,13 +234,7 @@ class i2cExt extends eqLogic {
 		log::add('i2cExt','debug',"function preUp");
 		if ( $this->getIsEnable() )
 		{
-			//log::add('i2cExt','debug','Carte @',$this->getConfiguration('address'));
-			//log::add('i2cExt','debug','get '.preg_replace("/:[^:]*@/", ":XXXX@", $this->getUrl()). 'status.xml');
-			// faire le test de présence réseau I2C
-			
-			/*$this->xmlstatus = true; 
-			if ( $this->xmlstatus === false )
-				throw new Exception(__('La carte n\'est correctement connectée au réseau I2C',__FILE__));*/
+			// todo
 		}
 	}
 
@@ -288,7 +261,7 @@ class i2cExt extends eqLogic {
 		}
 		$cmd = $this->getCmd(null, 'status');
 		if ( ! is_object($cmd) ) {
-			$cmd = new cmd();
+			$cmd = new i2cExtcmd();
 			$cmd->setName('Etat');
 			$cmd->setEqLogic_id($this->getId());
 			$cmd->setType('info');
@@ -307,25 +280,25 @@ class i2cExt extends eqLogic {
 				$cmd->save();
 			}
 		}
-		$cmd = $this->getCmd(null, 'updatetime');
-		if ( ! is_object($cmd)) {
-			$cmd = new cmd();
-			$cmd->setName('Dernier refresh');
-			$cmd->setEqLogic_id($this->getId());
-			$cmd->setLogicalId('updatetime');
-			$cmd->setUnite('');
-			$cmd->setType('info');
-			$cmd->setSubType('string');
-			$cmd->setIsHistorized(0);
-			$cmd->setEventOnly(1);
-			$cmd->save();		
+		$i2cExtcmd = $this->getCmd(null, 'updatetime');
+		if ( ! is_object($i2cExtcmd)) {
+			$i2cExtcmd = new i2cExtcmd();
+			$i2cExtcmd->setName('Dernier refresh');
+			$i2cExtcmd->setEqLogic_id($this->getId());
+			$i2cExtcmd->setLogicalId('updatetime');
+			$i2cExtcmd->setUnite('');
+			$i2cExtcmd->setType('info');
+			$i2cExtcmd->setSubType('string');
+			$i2cExtcmd->setIsHistorized(0);
+			$i2cExtcmd->setEventOnly(1);
+			$i2cExtcmd->save();		
 		}
 		else
 		{
-			if ( $cmd->getDisplay('generic_type') == "" )
+			if ( $i2cExtcmd->getDisplay('generic_type') == "" )
 			{
-				$cmd->setDisplay('generic_type','GENERIC_INFO');
-				$cmd->save();
+				$i2cExtcmd->setDisplay('generic_type','GENERIC_INFO');
+				$i2cExtcmd->save();
 			}
 		}
 		$all_on = $this->getCmd(null, 'all_on');
@@ -404,38 +377,13 @@ class i2cExt extends eqLogic {
 
 	public function configPush() {
 		log::add('i2cExt','debug',"function config push");
-		if ( $this->getIsEnable() ) {
-			log::add('i2cExt','debug',"get ".preg_replace("/:[^:]*@/", ":XXXX@", $this->getUrl()));
-			$liste_seuil_bas = explode(',', init('seuil_bas'));
-			$liste_seuil_haut = explode(',', init('seuil_haut'));
-			
-			foreach (explode(',', init('eqLogicPush_id')) as $_eqLogic_id) {
-				$eqLogic = eqLogic::byId($_eqLogic_id);
-				if (!is_object($eqLogic)) {
-					throw new Exception(__('Impossible de trouver l\'équipement : ', __FILE__) . $_eqLogic_id);
-				}
-				if ( method_exists($eqLogic, "configPush" ) ) {
-					if ( get_class ($eqLogic) == "i2cExt_analogique" )
-					{
-						$eqLogic->configPush($this->getUrl(), $pathjeedom, config::byKey("internalAddr"), config::byKey("internalPort"), array_shift($liste_seuil_bas), array_shift($liste_seuil_haut));
-					}
-					else
-					{
-						$eqLogic->configPush($this->getUrl(), $pathjeedom, config::byKey("internalAddr"), config::byKey("internalPort"));
-					}
-				}
-			}
-		}
+
+		
 	}
 
 	public function event() {
 		log::add('i2cExt','debug',"function event");
-		foreach (eqLogic::byType('i2cExt') as $eqLogic) {
-			log::add('i2cExt','debug',"+");
-			if ( $eqLogic->getId() == init('id') ) {
-				$eqLogic->scan();
-			}
-		}
+
 	}
 		
 	public function getImage() {
