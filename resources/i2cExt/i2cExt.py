@@ -205,10 +205,10 @@ def read_socket():
 			board=str(message['board'])
 			
 			if message['apikey'] != _apikey:
-				logging.error("Invalid apikey from socket : " + str(message))
+				raise KeyError()
 			
-			if message['apikey'] != _apikey:
-				logging.error("Invalid apikey from socket : " + str(message))
+			if not isinstance(address, int):
+				raise TypeError('Address is not an integer')
 			
 			card=findCardAdress(address)
 
@@ -239,7 +239,11 @@ def read_socket():
 						else:
 							for i in range(card.outputchannel):
 								card.newSP(i, 0)
-	#Catch all exception and print exception name raised
+	except TypeError as te:
+		logging.error('Error on read socket : '+ te + str(message))
+	except KeyError as ke:
+		logging.error("Invalid apikey from socket : " + ke + str(message))
+	#Catch all other exception and print exception name raised
 	except:
 		logging.error('Error on read socket : '+ sys.exc_info()[0])	
 
