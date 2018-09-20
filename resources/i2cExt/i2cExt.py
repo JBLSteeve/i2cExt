@@ -31,6 +31,7 @@ from optparse import OptionParser
 from os.path import join
 import json
 from collections import namedtuple
+from abc import ABCMeta, abstractmethod
 
 # Equipements
 Eqts=[]
@@ -42,7 +43,9 @@ except ImportError:
 	sys.exit(1)
 
 # ----------------------------------------------------------------------------
-class CARDS(object):
+class CARDS:
+	__metaclass__ = ABCMeta
+
 	def __init__(self, _cardAddress,_type):
 		if (not isinstance(_cardAddress, int)):
 			raise TypeError("Should be an integer")	
@@ -96,6 +99,27 @@ class CARDS(object):
 				return 1
 		else:
 			return -1
+
+	@abstractmethod
+	def readCardInput(self):
+		'''Read input signal from card
+		This method sends a read request throught i2c connection to receive registrer containing input values and update class internal buffer.
+		'''
+		return -1
+
+	@abstractmethod
+	def readCardOutput(self):
+		'''Read output signal from card
+		This method sends a read request throught i2c connection to receive registrer containing ouput values and update class internal buffer.
+		'''
+		return -1
+	
+	@abstractmethod
+	def write(self):
+		'''Write output to card
+		This method sends local ouput buffer to card throught i2c connection for application.
+		'''
+		return -1
 # ------------------------------------------------------------------------------
 class IN8R8(CARDS):
 	def __init__(self, _cardAddress,_type,_reply_input):
