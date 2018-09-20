@@ -39,6 +39,31 @@ class i2cExt_bouton extends eqLogic {
 			$state->setTemplate('mobile', 'light');
 			$state->save();
 		}
+		if ( ! is_object($btn_on) ) {
+            $btn_on = new i2cExt_boutonCmd();
+			$btn_on->setName('On');
+			$btn_on->setEqLogic_id($this->getId());
+			$btn_on->setType('action');
+			$btn_on->setSubType('other');
+			$btn_on->setLogicalId('btn_on');
+			$btn_on->setEventOnly(1);
+			$btn_on->setIsVisible(0);
+			$btn_on->setDisplay('generic_type','LIGHT_ON');
+			$btn_on->save();
+		}
+        $btn_off = $this->getCmd(null, 'btn_off');
+        if ( ! is_object($btn_off) ) {
+            $btn_off = new i2cExt_boutonCmd();
+			$btn_off->setName('Off');
+			$btn_off->setEqLogic_id($this->getId());
+			$btn_off->setType('action');
+			$btn_off->setSubType('other');
+			$btn_off->setLogicalId('btn_off');
+			$btn_off->setEventOnly(1);
+			$btn_off->setIsVisible(0);
+			$btn_off->setDisplay('generic_type','LIGHT_OFF');
+			$btn_off->save();
+		}
 	}
 
 	public function preUpdate()
@@ -67,7 +92,48 @@ class i2cExt_bouton extends eqLogic {
 		{
 			$state->setTemplate('mobile', 'light');
 			$state->save();
-		}			
+		}	
+		$btn_on = $this->getCmd(null, 'btn_on');
+        if ( ! is_object($btn_on) ) {
+            $btn_on = new i2cExt_boutonCmd();
+			$btn_on->setName('On');
+			$btn_on->setEqLogic_id($this->getId());
+			$btn_on->setType('action');
+			$btn_on->setSubType('other');
+			$btn_on->setLogicalId('btn_on');
+			$btn_on->setEventOnly(1);
+			$btn_on->setIsVisible(0);
+			$btn_on->setDisplay('generic_type','LIGHT_ON');
+			$btn_on->save();
+		}
+ 		else
+		{
+			if ( $btn_on->getDisplay('generic_type') == "" )
+			{
+				$btn_on->setDisplay('generic_type','LIGHT_ON');
+				$btn_on->save();
+			}			
+		}
+        $btn_off = $this->getCmd(null, 'btn_off');
+        if ( ! is_object($btn_off) ) {
+            $btn_off = new i2cExt_boutonCmd();
+			$btn_off->setName('Off');
+			$btn_off->setEqLogic_id($this->getId());
+			$btn_off->setType('action');
+			$btn_off->setSubType('other');
+			$btn_off->setLogicalId('btn_off');
+			$btn_off->setEventOnly(1);
+			$btn_off->setIsVisible(0);
+			$btn_off->save();
+		}
+ 		else
+		{
+			if ( $btn_off->getDisplay('generic_type') == "" )
+			{
+				$btn_off->setDisplay('generic_type','LIGHT_OFF');
+				$btn_off->save();
+			}			
+		}		
 
 	}
 
@@ -84,11 +150,15 @@ class i2cExt_bouton extends eqLogic {
         if (!is_object($cmd)) {
             throw new Exception('Commande ID virtuel inconnu : ' . init('id'));
         }
-		log::add('i2cExt','debug',"Receive push notification for ".$cmd->getName()." (". init('id').") : value = ".init('state'));
+		log::add('i2cExt','debug',"Receive notification for ".$cmd->getName()." (". init('id').") : value = ".init('state'));
 		if ($cmd->execCmd() != $cmd->formatValue(init('state'))) {
 			$cmd->setCollectDate('');
 			$cmd->event(init('state'));
 		}
+    }
+    
+    public function getLinkToConfiguration() {
+        return 'index.php?v=d&p=i2cExt&m=i2cExt&id=' . $this->getId();
     }
 
     /*     * **********************Getteur Setteur*************************** */

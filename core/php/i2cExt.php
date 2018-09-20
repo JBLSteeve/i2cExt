@@ -32,14 +32,83 @@ if (!is_array($result)) {
 }
 $eqLogics = eqLogic::byType('i2cExt');
 
+//log::add('i2cExt','debug','device:' . print_r($result, true));
+
 if (isset($result['devices'])) {
 								
-	foreach ($result['devices'] as $key => $device) 
+	foreach ($result['devices'] as $key => $device) // decodage de l'entete
+
+	foreach ($eqLogics as $eqLogic) {
+		if (is_object($eqLogic)){
+			if ($eqLogic->getConfiguration('address')==$device['address']){
+			
+				// a faire pour mettre dans jeedom
+				if (isset($result['output'])) {
+					foreach ($result['output'] as $key => $output) 
+					for ($compteurId = 0; $compteurId <= 7; $compteurId++) {
+						if (isset($output['channel' . $compteurId])) {
+							log::add('i2cExt','debug','board:' . $device['board'] . ' address:' . $device['address'] . ' channel' . $compteurId . ':' . $output['channel' . $compteurId]);
+							$SubeqLogicOutput = eqLogic::byLogicalId($eqLogic->getId()."_R".$compteurId, 'i2cExt_relai');
+								if ( is_object($SubeqLogicOutput) ) {
+									if ($eqLogic->getObject_id()!='') {
+										$statuscmd = $SubeqLogicOutput->getCmd(null, 'state');
+										#$statuscmd->setCollectDate('');
+										$statuscmd->setCollectDate(date('Y-m-d H:i:s'));
+										$statuscmd->event($output['channel' . $compteurId]);
+										$statuscmd->setConfiguration('value',$output['channel' . $compteurId]);
+									}
+								}
+							}
+						}
+					}
+				// a faire pour mettre dans jeedom
+				if (isset($result['input'])) {
+					foreach ($result['input'] as $key => $input) 
+					for ($compteurId = 0; $compteurId <= 7; $compteurId++) {
+						if (isset($input['channel' . $compteurId])) {
+						//log::add('i2cExt','debug','board:' . $device['board'] . ' address:' . $device['address'] . ' channel' . $compteurId . ':' . $input['channel' . $compteurId]);
+						$SubeqLogicOutput = eqLogic::byLogicalId($eqLogic->getId()."_B".$compteurId, 'i2cExt_bouton');
+								if ( is_object($SubeqLogicOutput) ) {
+									if ($eqLogic->getObject_id()!='') {
+										$statuscmd = $SubeqLogicOutput->getCmd(null, 'state');
+										#$statuscmd->setCollectDate('');
+										//$statuscmd->setCollectDate(date('Y-m-d H:i:s'));
+										#$cmd->event($recu);
+										#$cmd->setConfiguration('value',$recu);
+										if ( $input['channel' . $compteurId] == 'Pulse') {
+											//log::add('i2cExt','debug',' channel' . $compteurId . ':Pulse');
+											$statuscmd->event(100);
+											$statuscmd->setConfiguration('value',100);
+											sleep(0.5);
+											$statuscmd->event(0);
+											$statuscmd->setConfiguration('value',0);
+										}elseif ( $input['channel' . $compteurId] == 'On') {	
+											//log::add('i2cExt','debug',' channel' . $compteurId . ':On');
+											$statuscmd->event(100);
+											$statuscmd->setConfiguration('value',100);
+										}else{	
+											//log::add('i2cExt','debug',' channel' . $compteurId . ':Off');
+											$statuscmd->event(0);
+											$statuscmd->setConfiguration('value',0);
+										}
+									}
+								}
+							}
+						}
+					}
+				
+			}
+			else {
+			// carte inconnue
+			}
+		}
+	}
+		 	
 	
-	
-	log::add('i2cExt','debug','device:' . print_r($device, true));
-	
-	
+	/*
+	//log::add('i2cExt','debug','device:' . print_r($device, true));
+	$changeinput=false;	
+	$changeoutput=false;	
 	
 	// pour les relais
 	foreach ($eqLogics as $eqLogic) {
@@ -52,45 +121,52 @@ if (isset($result['devices'])) {
 						$SubeqLogicOutput = eqLogic::byLogicalId($eqLogic->getId()."_R".$compteurId, 'i2cExt_relai');
 						if ( is_object($SubeqLogicOutput) ) {
 							if ($eqLogic->getObject_id()!='') {
-								log::add('i2cExt','debug','mise à jour du relai : '.$SubeqLogicOutput->getObject_id() . ' avec la valeur:' . $output['channel' . (($SubeqLogicOutput->getObject_id()) - 1) ]);
+								//log::add('i2cExt','debug','mise à jour du relai : '.$SubeqLogicOutput->getObject_id() . ' avec la valeur:' . $output['channel' . (($SubeqLogicOutput->getObject_id()) - 1) ]);
 								$statuscmd = $SubeqLogicOutput->getCmd(null, 'state');
 								$statuscmd->setCollectDate('');
-								$statuscmd->event($output['channel' . (($SubeqLogicOutput->getObject_id()) - 1) ]);	
+									#$cmd->setCollectDate(date('Y-m-d H:i:s'));
+									#$cmd->event($recu);
+									#$cmd->setConfiguration('value',$recu);
+								$statuscmd->event($output['channel' . (($SubeqLogicOutput->getObject_id()) - 1) ]);
+								$changeoutput=true;	
 							}
-							if (compteurId ==7) {
-								log::add('i2cExt','debug',"send change of output receive to dameon");
-								$message = trim(json_encode(array('apikey' => jeedom::getApiKey('i2cExt'), 'cmd' => 'receive','board' => $eqLogic->getConfiguration('board'), 'address' => $eqLogic->getConfiguration('address'), 'type' => 'output')));
-								$socket = socket_create(AF_INET, SOCK_STREAM, 0);
-								socket_connect($socket, '127.0.0.1', config::byKey('socketport', 'i2cExt'));
-								socket_write($socket, trim($message), strlen(trim($message)));
-								socket_close($socket);
-							}	
+	
 						}
 					}
 					if (isset($result['input'])) {
 						foreach ($result['input'] as $key => $input) 
-						log::add('i2cExt','debug','input:' . print_r($input, true));
+						//log::add('i2cExt','debug','input:' . print_r($input, true));
 						$SubeqLogicInput = eqLogic::byLogicalId($eqLogic->getId()."_B".$compteurId, 'i2cExt_bouton');
 						if ( is_object($SubeqLogicInput) ) {
 							if ($eqLogic->getObject_id()!='') {
 								log::add('i2cExt','debug','mise à jour du bouton : '.$SubeqLogicInput->getObject_id() . ' avec la valeur:' . $input['channel' . (($SubeqLogicInput->getObject_id()) - 1) ]);
+								
 								$statuscmd = $SubeqLogicInput->getCmd(null, 'state');
 								$statuscmd->setCollectDate('');
-								$statuscmd->event($input['channel' . (($SubeqLogicInput->getObject_id()) - 1) ]);	
-														
+								$statuscmd->event($input['channel' . (($SubeqLogicInput->getObject_id()) - 1) ]);
+								$changeinput=true;					
 							}
-							if (compteurId ==7) {
-								log::add('i2cExt','debug',"send change of input receive to dameon");
-								$message = trim(json_encode(array('apikey' => jeedom::getApiKey('i2cExt'), 'cmd' => 'receive','board' => $eqLogic->getConfiguration('board'), 'address' => $eqLogic->getConfiguration('address'), 'type' => 'input')));
-								$socket = socket_create(AF_INET, SOCK_STREAM, 0);
-								socket_connect($socket, '127.0.0.1', config::byKey('socketport', 'i2cExt'));
-								socket_write($socket, trim($message), strlen(trim($message)));
-								socket_close($socket);
-							}
+
 						}
 					}
 				}
 			}
 		}
+	
+	if (changeoutput ==true) {
+		//log::add('i2cExt','debug',"send change of output receive to dameon");
+		$message = trim(json_encode(array('apikey' => jeedom::getApiKey('i2cExt'), 'cmd' => 'receive','board' => $eqLogic->getConfiguration('board'), 'address' => $eqLogic->getConfiguration('address'), 'type' => 'output')));
+		$socket = socket_create(AF_INET, SOCK_STREAM, 0);
+		socket_connect($socket, '127.0.0.1', config::byKey('socketport', 'i2cExt'));
+		socket_write($socket, trim($message), strlen(trim($message)));
+		socket_close($socket);
 	}
+	if ($changeinput ==true) {
+		//log::add('i2cExt','debug',"send change of input receive to dameon");
+		$message = trim(json_encode(array('apikey' => jeedom::getApiKey('i2cExt'), 'cmd' => 'receive','board' => $eqLogic->getConfiguration('board'), 'address' => $eqLogic->getConfiguration('address'), 'type' => 'input')));
+		$socket = socket_create(AF_INET, SOCK_STREAM, 0);
+		socket_connect($socket, '127.0.0.1', config::byKey('socketport', 'i2cExt'));
+		socket_write($socket, trim($message), strlen(trim($message)));
+		socket_close($socket);
+	}*/
 }

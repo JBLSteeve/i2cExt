@@ -1,5 +1,6 @@
 == Présentation ==
 Ce plugin permet de gérer les cartes XplDuino avec l'I2C d'un Raspberry ou Odroid.
+Il reprends le design du plugin IPX800 et le principe pour le Daemon du plugin JeePlcBus
 
 
 === Données cartes compatibles sont : ===
@@ -20,4 +21,5 @@ Puis définir :
 * ''Catégorie'' (optionnelle)
 * ''Activer'' (à cocher, sinon l’équipement ne sera pas utilisable)
 * ''Visible'' (optionel si vous ne désirez pas le rendre visible sur le Dashboard)
-
+* ''Type de carte'' (Pour donner au daemon le type de carte afin de proposer les adresses)
+* ''Adresse I2C de la carte'' Pour définir l'adresse de la carte sur le bus I2C

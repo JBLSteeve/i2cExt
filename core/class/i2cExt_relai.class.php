@@ -179,6 +179,9 @@ class i2cExt_relai extends eqLogic {
 		}
     }
 
+	public function getLinkToConfiguration() {
+        return 'index.php?v=d&p=i2cExt&m=i2cExt&id=' . $this->getId();
+    }
 
     /*     * **********************Getteur Setteur*************************** */
 }
