@@ -66,6 +66,17 @@ class CARDS(object):
 		#self._register = self.Register(W_OUTPUT=66, R_OUTPUT=65, R_INPUT=80, W_HBEAT=96, R_HBEAT=97, R_VERSION=144)
 		
 	def manageHbeat(self, hbeat_value):
+		'''Check communication with cards
+
+		Read cards heartbit and check with last card value. If different, card is online else no communication.
+		if card is online, send application heartbit to card.
+
+		hbeat_value : numeric - application hearbit that will be send to card.
+
+		Return current status of communication:
+		- 0 : No communication
+		- 1 : Online
+		'''
 		new_hbeat = jeedom_i2c.read(self.address,R_HBEAT)
 		if(new_hbeat != self.hbeat):
 			self.status = 1 #Communication OK
@@ -75,17 +86,31 @@ class CARDS(object):
 			self.input = 0	#self.reply_input
 		self.hbeat = new_hbeat
 		return self.status
-			
+		
 	def aboutVersion(self):
+		'''Return card version
+		When called, request card hardware version through i2c connection and return it.
+		'''
 		self.version = self.readCommand(R_VERSION)
 		logging.info("The I2C card with the @:" + str(self.address) + " is in the version :" + str(self.version))
 		return self.version
 		
 	def writeCommand(self,_command,_value):
+		'''Send raw command through i2c
+		Create an i2c write request with _command and _value as argument.
+
+		_command : numeric - id of requested command
+		_value : any - argument of command.
+		'''
 		jeedom_i2c.write(self.address,_command,_value)
 		logging.debug("Send command :" + str(_command) + " value :" + str(_value) + " for board @:" + str(self.address))
 
 	def readCommand(self,_command):
+		'''Receive raw command through i2c
+		Create an i2c read request with _command as argument.
+
+		_command : numeric - id of requested command
+		'''
 		value = jeedom_i2c.read(self.address,_command)
 		logging.debug("Read command :" + str(_command) + " value :" + str(value) + " for board @:" + str(self.address))
 		return value
