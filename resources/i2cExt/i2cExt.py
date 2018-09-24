@@ -63,7 +63,7 @@ class CARDS:
 		self.board=_board
 		self.address=_cardAddress
 		self.hbeat=0
-		self.status=self.manageHbeat(0)	
+		self._status=self.manageHbeat(0)	
 		self.loss_counter=0	#pas utilise
 		self.version=self.aboutVersion()
 		self.Register = namedtuple("Register", "W_OUTPUT R_OUTPUT R_INPUT W_HBEAT R_HBEAT R_VERSION")
@@ -72,13 +72,13 @@ class CARDS:
 	def manageHbeat(self, hbeat_value):
 		new_hbeat = jeedom_i2c.read(self.address,self._register.R_HBEAT)
 		if(new_hbeat != self.hbeat):
-			self.status = 1 #Communication OK
+			self.ComOK = 1  #Communication OK
 			jeedom_i2c.write(self.address,self._register.W_HBEAT,hbeat_value)
 		else:
-			self.status = 0 #Communication KO
+			self.ComOK = 0 #Communication KO
 			self.input = 0	#self.reply_input
 		self.hbeat = new_hbeat
-		return self.status
+		return self._status
 			
 	def aboutVersion(self):
 		self.version = self.readCommand(self._register.R_VERSION)
@@ -93,13 +93,21 @@ class CARDS:
 		value = jeedom_i2c.read(self.address,_command)
 		logging.debug("Read command :" + str(_command) + " value :" + str(value) + " for board @:" + str(self.address))
 		return value
-		
-	def clearComIsOK(self):
-		self.status=0
 	
-	def setComIsOK(self):
-		self.status=1
-	
+	@property
+	def ComOK(self):
+		return self._status
+
+	@ComOK.setter
+	def ComOK(self, val):
+		if isinstance(val, int):
+			if val == 0 or val == 1:
+				self._status = val
+			else:
+				raise ValueError("ComOK is either equal to 1 or 0")
+		else:
+			raise TypeError("ComOK has to be an integer")
+
 	@abstractmethod
 	def readCardInput(self):
 		'''Read input signal from card
@@ -305,7 +313,7 @@ def read_i2cbus():
 # ----------------------------------------------------------------------------			
 def write_i2cbus():
 	for eqt in Eqts:		# Loop for each boards
-		if eqt.status != 0:
+		if eqt.ComOK != 0:
 			if eqt.outputChanged != 0:
 				eqt.write()				# Write to board the output
 
@@ -329,7 +337,7 @@ def write_socket(type,address,board,channelid,value):	#type=input of output
 def cards_hbeat():
 	for eqt in Eqts:
 		eqt.manageHbeat(eqt.hbeat)
-		if eqt.status == 0:
+		if eqt.ComOK == 0:
 			logging.info("The I2C card with the @:" + str(eqt.address) + " is KO")
 		"""else :
 			logging.debug("The card with the @ : " + str(eqt.address) + " is OK with heartbeat :" + str(eqt.hbeat))"""
