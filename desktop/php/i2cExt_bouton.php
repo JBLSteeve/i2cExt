@@ -45,6 +45,8 @@
 					<label class="checkbox-inline"><input type="checkbox" class="eqLogicAttr" data-label-text="{{Visible}}" data-l1key="isVisible" checked/>Visible</label>
 					</div>
                 </div>
+
+                
             </fieldset> 
         </form>
 
