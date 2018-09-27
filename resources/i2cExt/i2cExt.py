@@ -31,6 +31,8 @@ from optparse import OptionParser
 from os.path import join
 import json
 from collections import namedtuple
+from abc import ABCMeta, abstractmethod
+
 
 # Card Registers
 W_OUTPUT=66 #0x42
@@ -50,7 +52,8 @@ except ImportError:
 	sys.exit(1)
 
 # ----------------------------------------------------------------------------
-class CARDS(object):
+class CARDS:
+	__metaclass__ = ABCMeta
 	Register = collections.namedtuple('Register', ['W_OUTPUT', 'R_OUTPUT', 'R_INPUT', 'W_HBEAT', 'R_HBEAT', 'R_VERSION'])
 
 	def __init__(self, _cardAddress,_board):
@@ -60,55 +63,71 @@ class CARDS(object):
 		self.board=_board
 		self.address=_cardAddress
 		self.hbeat=0
-		self.status=0
-		self.reply_input=0
-		self.status=self.manageHbeat(0)	
+		self._status=self.manageHbeat(0)	
 		self.loss_counter=0	#pas utilise
 		self.version=self.aboutVersion()
-		#self._register = self.Register(W_OUTPUT=66, R_OUTPUT=65, R_INPUT=80, W_HBEAT=96, R_HBEAT=97, R_VERSION=144)
+		self.Register = namedtuple("Register", "W_OUTPUT R_OUTPUT R_INPUT W_HBEAT R_HBEAT R_VERSION")
+		self._register = self.Register(W_OUTPUT=66, R_OUTPUT=65, R_INPUT=80, W_HBEAT=96, R_HBEAT=97, R_VERSION=144)
 		
 	def manageHbeat(self, hbeat_value):
-		new_hbeat = jeedom_i2c.read(self.address,R_HBEAT)
+		new_hbeat = jeedom_i2c.read(self.address,self._register.R_HBEAT)
 		if(new_hbeat != self.hbeat):
-			if(self.status ==0):
-				write_socket("status",self.address,self.board,"","Alive")
-				logging.debug("The card with the @ : " + str(self.address) + " is OK with heartbeat :" + str(new_hbeat))
-				
-			self.status = 1 #Communication OK
-			jeedom_i2c.write(self.address,W_HBEAT,hbeat_value)
+			self.ComOK = 1  #Communication OK
+			jeedom_i2c.write(self.address,self._register.W_HBEAT,hbeat_value)
 		else:
-			if(self.status ==1):
-				write_socket("status",self.address,self.board,"","LossCom")		
-				logging.info("The I2C card with the @:" + str(self.address) + " is KO")
-			
-			self.status = 0 #Communication KO
-			self.input = self.reply_input
+			self.ComOK = 0 #Communication KO
+			self.input = 0	#self.reply_input
 		self.hbeat = new_hbeat
-		return self.status
+		return self._status
 			
 	def aboutVersion(self):
-		if(self.status==1):
-			self.version = self.readCommand(R_VERSION)
-			logging.info("The I2C card with the @:" + str(self.address) + " is in the version :" + str(self.version))
-			return self.version
+		self.version = self.readCommand(self._register.R_VERSION)
+		logging.info("The I2C card with the @:" + str(self.address) + " is in the version :" + str(self.version))
+		return self.version
 		
 	def writeCommand(self,_command,_value):
-		if(self.status==1):
-			jeedom_i2c.write(self.address,_command,_value)
-			logging.debug("Send command :" + str(_command) + " value :" + str(_value) + " for board @:" + str(self.address))
+		jeedom_i2c.write(self.address,_command,_value)
+		logging.debug("Send command :" + str(_command) + " value :" + str(_value) + " for board @:" + str(self.address))
 
 	def readCommand(self,_command):
-		if(self.status==1):
-			value = jeedom_i2c.read(self.address,_command)
-			logging.debug("Read command :" + str(_command) + " value :" + str(value) + " for board @:" + str(self.address))
-			return value
-		
-	def clearComIsOK(self):
-		status=0
+		value = jeedom_i2c.read(self.address,_command)
+		logging.debug("Read command :" + str(_command) + " value :" + str(value) + " for board @:" + str(self.address))
+		return value
 	
-	def setComIsOK(self):
-		status=1
+	@property
+	def ComOK(self):
+		return self._status
+
+	@ComOK.setter
+	def ComOK(self, val):
+		if isinstance(val, int):
+			if val == 0 or val == 1:
+				self._status = val
+			else:
+				raise ValueError("ComOK is either equal to 1 or 0")
+		else:
+			raise TypeError("ComOK has to be an integer")
+
+	@abstractmethod
+	def readCardInput(self):
+		'''Read input signal from card
+		This method sends a read request throught i2c connection to receive registrer containing input values and update class internal buffer.
+		'''
+		return -1
+
+	@abstractmethod
+	def readCardOutput(self):
+		'''Read output signal from card
+		This method sends a read request throught i2c connection to receive registrer containing ouput values and update class internal buffer.
+		'''
+		return -1
 	
+	@abstractmethod
+	def write(self):
+		'''Write output to card
+		This method sends local ouput buffer to card throught i2c connection for application.
+		'''
+		return -1
 # ------------------------------------------------------------------------------
 class IN8R8(CARDS):
 	def __init__(self, _cardAddress,_board,_reply_input):
@@ -159,9 +178,9 @@ class IN8R8(CARDS):
 
 	# Read input of the board
 	def readCardInput(self):
-		input=splitbyte(jeedom_i2c.read(self.address,R_INPUT))
+		input=splitbyte(jeedom_i2c.read(self.address,self._register.R_INPUT))
 		for x in range(len(input)):
-			if (input[x] != self.input[x]):	#Verifier que ce sont des tableau (longueur ...)
+			if (input[x] != self.input[x]):
 				if ((input[x] != False) & (self.inputOn[x] ==False)) :	# Cas haut -> bas, relachement avant ON
 					logging.debug("Read pulse on input:" + str(x) + " for the IN8R8 board @:" + str(self.address))
 					write_socket("input",self.address,self.board,x,"Pulse")
@@ -184,7 +203,7 @@ class IN8R8(CARDS):
 				
 	# Read output feedback of the board
 	def readCardOutput(self):
-		routput=splitbyte(jeedom_i2c.read(self.address,R_OUTPUT))
+		routput=splitbyte(jeedom_i2c.read(self.address,self._register.R_OUTPUT))
 		#logging.debug("Read output :" + str(routput) + " for the IN8R8 board @:" + str(self.address))
 		if  ((self.routput != routput)):
 			for x in range(len(routput)):
@@ -200,8 +219,8 @@ class IN8R8(CARDS):
 	
 	# A deplacer en lib jeedom
 	def write(self):
-		jeedom_i2c.write(self.address,W_OUTPUT,self.output)
 		self.outputChanged = 0
+		jeedom_i2c.write(self.address,self._register.W_OUTPUT,self.output)
 		logging.debug("Send output :" + jeedom_utils.dec2bin(self.output,8) + " for the IN8R8 board @:" + str(self.address))
 	
 	def writeCommand(self,_command,_value):
@@ -224,12 +243,12 @@ def splitbyte(_byte):
 def findCardAdress(_address):
 	if len(Eqts) == 0:
 		return None
-	else :
+	else:
 		for eqt in Eqts:
- 			if eqt.address == _address :
- 				return eqt
- 		else:
- 			return None
+			if eqt.address == _address:
+				return eqt
+		else:
+			return None
 	
 # ----------------------------------------------------------------------------			
 def read_socket():
@@ -242,18 +261,17 @@ def read_socket():
 			board=str(message['board'])
 			
 			if message['apikey'] != _apikey:
-				logging.error("Invalid apikey from socket : " + str(message))
+				raise KeyError()
 			
-			if message['apikey'] != _apikey:
-				logging.error("Invalid apikey from socket : " + str(message))
+			if not isinstance(address, int):
+				raise TypeError('Address is not an integer')
 			
 			card=findCardAdress(address)
 						
 			if card == None:
 				if message['cmd'] == 'add':
 					#logging.debug("Add the device with @:" + str(address)) 
-					Eqts.append(IN8R8(address,board,[False,False,False,False,False,False,False,False]))				
-			
+					Eqts.append(IN8R8(address,board,0))				
 			else:
 				if message['cmd'] == 'receive':
 					if message['type'] == 'input':
@@ -277,9 +295,13 @@ def read_socket():
 						else:
 							for i in range(card.outputchannel):
 								card.newSP(i, 0)
-
-	except Exception,e:
-		logging.error('Error on read socket : '+str(e))	
+	except TypeError as te:
+		logging.error('Error on read socket : '+ te + str(message))
+	except KeyError as ke:
+		logging.error("Invalid apikey from socket : " + ke + str(message))
+	#Catch all other exception and print exception name raised
+	except:
+		logging.error('Error on read socket : '+ sys.exc_info()[0])	
 
 # ----------------------------------------------------------------------------
 def read_i2cbus():
@@ -291,33 +313,34 @@ def read_i2cbus():
 # ----------------------------------------------------------------------------			
 def write_i2cbus():
 	for eqt in Eqts:		# Loop for each boards
-		if eqt.status != 0:
+		if eqt.ComOK != 0:
 			if eqt.outputChanged != 0:
 				eqt.write()				# Write to board the output
 
 # ----------------------------------------------------------------------------
-def write_socket(type,address,board,channelid,value):	#type=input or output or status
+def write_socket(type,address,board,channelid,value):	#type=input of output
 	logging.debug("Send update of " + str(type) + " for the board @:" + str(address))
 	#Construction JSON
-	message ={}
-	message['address'] = str(address).replace('\x00', '')
-	message['board'] = str(board).replace('\x00', '')
+	board ={}
+	board['address'] = str(address).replace('\x00', '')
+	board['board'] = str(type).replace('\x00', '')
 	status ={}
-	if  (type == "status"):
-		status['status'] = str(value)
-	else :
-		status['channel' + str(channelid)] = str(value)
-		
+	status['channel' + str(channelid)] = str(value)
+	
 	try:
-		globals.JEEDOM_COM.add_changes('devices::'+message['address'],message)
+		globals.JEEDOM_COM.add_changes('devices::'+board['address'],board)
 		globals.JEEDOM_COM.add_changes(str(type) + '::',status)
-	except Exception, e:
+	except Exception:
 		logging.error("Send to jeedom error for channel " +str(type) + " id :" + str(channelid) + " on board @:" + str(address))
 				
 # ----------------------------------------------------------------------------	
 def cards_hbeat():
 	for eqt in Eqts:
 		eqt.manageHbeat(eqt.hbeat)
+		if eqt.ComOK == 0:
+			logging.info("The I2C card with the @:" + str(eqt.address) + " is KO")
+		"""else :
+			logging.debug("The card with the @ : " + str(eqt.address) + " is OK with heartbeat :" + str(eqt.hbeat))"""
 
 # ----------------------------------------------------------------------------	
 def main():
@@ -434,7 +457,7 @@ try:
 	jeedom_i2c = jeedom_i2c(port=_device)
 	jeedom_socket = jeedom_socket(port=_socket_port,address=_socket_host)
 	main()
-except Exception, e:
-	logging.error('Fatal error : '+str(e))
+except:
+	logging.error('Fatal error : '+sys.exc_info()[0])
 	logging.debug(traceback.format_exc())
 	shutdown()
