@@ -39,38 +39,41 @@ class i2cExt_bouton extends eqLogic {
 			$state->setTemplate('mobile', 'light');
 			$state->save();
 		}
-		if ( ! is_object($btn_on) ) {
-            $btn_on = new i2cExt_boutonCmd();
-			$btn_on->setName('On');
-			$btn_on->setEqLogic_id($this->getId());
-			$btn_on->setType('action');
-			$btn_on->setSubType('other');
-			$btn_on->setLogicalId('btn_on');
-			$btn_on->setEventOnly(1);
-			$btn_on->setIsVisible(0);
-			$btn_on->setDisplay('generic_type','LIGHT_ON');
-			$btn_on->save();
-		}
-        $btn_off = $this->getCmd(null, 'btn_off');
-        if ( ! is_object($btn_off) ) {
-            $btn_off = new i2cExt_boutonCmd();
-			$btn_off->setName('Off');
-			$btn_off->setEqLogic_id($this->getId());
-			$btn_off->setType('action');
-			$btn_off->setSubType('other');
-			$btn_off->setLogicalId('btn_off');
-			$btn_off->setEventOnly(1);
-			$btn_off->setIsVisible(0);
-			$btn_off->setDisplay('generic_type','LIGHT_OFF');
-			$btn_off->save();
+		$nbimpulsion = $this->getCmd(null, 'nbimpulsion');
+		if ( ! is_object($nbimpulsion) ) {
+            $nbimpulsion = new i2cExt_boutonCmd();
+			$nbimpulsion->setName('Nombre d impulsion');
+			$nbimpulsion->setEqLogic_id($this->getId());
+			$nbimpulsion->setType('info');
+			$nbimpulsion->setSubType('numeric');
+			$nbimpulsion->setLogicalId('info');
+			$nbimpulsion->setEventOnly(1);
+			$nbimpulsion->setDisplay('generic_type','GENERIC_INFO');
+			$nbimpulsion->save();
 		}
 	}
 
 	public function preUpdate()
 	{
         $nbimpulsion = $this->getCmd(null, 'nbimpulsion');
-        if ( is_object($nbimpulsion) ) {
-			$nbimpulsion->remove();
+        if ( ! is_object($nbimpulsion) ) {
+            $nbimpulsion = new i2cExt_boutonCmd();
+			$nbimpulsion->setName('Nombre d impulsion');
+			$nbimpulsion->setEqLogic_id($this->getId());
+			$nbimpulsion->setType('info');
+			$nbimpulsion->setSubType('numeric');
+			$nbimpulsion->setLogicalId('nbimpulsion');
+			$nbimpulsion->setEventOnly(1);
+			$nbimpulsion->setDisplay('generic_type','GENERIC_INFO');
+			$nbimpulsion->save();
+		}
+		else
+		{
+			if ( $nbimpulsion->getDisplay('generic_type') == "" )
+			{
+				$nbimpulsion->setDisplay('generic_type','GENERIC_INFO');
+				$nbimpulsion->save();
+			}
 		}
         $state = $this->getCmd(null, 'etat');
         if ( is_object($state) ) {
@@ -93,48 +96,6 @@ class i2cExt_bouton extends eqLogic {
 			$state->setTemplate('mobile', 'light');
 			$state->save();
 		}	
-		$btn_on = $this->getCmd(null, 'btn_on');
-        if ( ! is_object($btn_on) ) {
-            $btn_on = new i2cExt_boutonCmd();
-			$btn_on->setName('On');
-			$btn_on->setEqLogic_id($this->getId());
-			$btn_on->setType('action');
-			$btn_on->setSubType('other');
-			$btn_on->setLogicalId('btn_on');
-			$btn_on->setEventOnly(1);
-			$btn_on->setIsVisible(0);
-			$btn_on->setDisplay('generic_type','LIGHT_ON');
-			$btn_on->save();
-		}
- 		else
-		{
-			if ( $btn_on->getDisplay('generic_type') == "" )
-			{
-				$btn_on->setDisplay('generic_type','LIGHT_ON');
-				$btn_on->save();
-			}			
-		}
-        $btn_off = $this->getCmd(null, 'btn_off');
-        if ( ! is_object($btn_off) ) {
-            $btn_off = new i2cExt_boutonCmd();
-			$btn_off->setName('Off');
-			$btn_off->setEqLogic_id($this->getId());
-			$btn_off->setType('action');
-			$btn_off->setSubType('other');
-			$btn_off->setLogicalId('btn_off');
-			$btn_off->setEventOnly(1);
-			$btn_off->setIsVisible(0);
-			$btn_off->save();
-		}
- 		else
-		{
-			if ( $btn_off->getDisplay('generic_type') == "" )
-			{
-				$btn_off->setDisplay('generic_type','LIGHT_OFF');
-				$btn_off->save();
-			}			
-		}		
-
 	}
 
 	public function preInsert()
