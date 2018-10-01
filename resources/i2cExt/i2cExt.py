@@ -30,8 +30,7 @@ import xml.dom.minidom as minidom
 from optparse import OptionParser
 from os.path import join
 import json
-import collections
-#from collections import namedtuple
+from collections import namedtuple
 from abc import ABCMeta, abstractmethod
 
 
@@ -54,7 +53,8 @@ except ImportError:
 
 # ----------------------------------------------------------------------------
 class CARDS(object):
-	__metaclass__ = ABCMeta					
+	__metaclass__ = ABCMeta	
+	#Register = namedtuple('Register', ['W_OUTPUT', 'R_OUTPUT', 'R_INPUT', 'W_HBEAT', 'R_HBEAT', 'R_VERSION'])				
 
 	def __init__(self, _cardAddress,_board):
 		if (not isinstance(_cardAddress, int)):
@@ -64,12 +64,10 @@ class CARDS(object):
 		self.address=_cardAddress
 		self.hbeat=0
 		self._status=0
-		self.reply_input=0
 		self._status=self.manageHbeat(0)	
-		self.loss_counter=0	#pas utilise
 		self.version=self.aboutVersion()
-		self.Register = collections.namedtuple("Register",["W_OUTPUT", "R_OUTPUT", "R_INPUT", "W_HBEAT", "R_HBEAT", "R_VERSION"])
-		self._register = self.Register(W_OUTPUT=66, R_OUTPUT=65, R_INPUT=80, W_HBEAT=96, R_HBEAT=97, R_VERSION=144)
+		#self.Register = namedtuple("Register",["W_OUTPUT", "R_OUTPUT", "R_INPUT", "W_HBEAT", "R_HBEAT", "R_VERSION"])
+		#self._register = self.Register(W_OUTPUT=66, R_OUTPUT=65, R_INPUT=80, W_HBEAT=96, R_HBEAT=97, R_VERSION=144)
 		
 	def manageHbeat(self, hbeat_value):
 		'''Check communication with cards
@@ -84,23 +82,21 @@ class CARDS(object):
 		- 1 : Online
 		'''
 		new_hbeat = jeedom_i2c.read(self.address,R_HBEAT)
-		#new_hbeat = jeedom_i2c.read(self.address,self._register.R_HBEAT)
 		if(new_hbeat != self.hbeat):
 			if(self._status ==0):
 				write_socket("status",self.address,self.board,"","Alive")
 				logging.debug("The card with the @ : " + str(self.address) + " is OK with heartbeat :" + str(new_hbeat))
-				
-			self.ComOK = 1  #Communication OK
+			self.ComOK=1  #Communication OK
 			jeedom_i2c.write(self.address,W_HBEAT,hbeat_value)
 		else:
 			if(self._status ==1):
 				write_socket("status",self.address,self.board,"","LossCom")		
 				logging.info("The I2C card with the @:" + str(self.address) + " is KO")
 			
-			self.ComOK = 0 #Communication KO
+			self.ComOK=0  #Communication KO
 			self.input = self.reply_input
 		self.hbeat = new_hbeat
-		return self.status
+		return self._status
 		
 	def aboutVersion(self):
 		'''Return card version
@@ -194,19 +190,22 @@ class IN8R8(CARDS):
 			return 0
 		else :
 			return 1
+			
 	# set the output setpoint
 	def newSP(self, _channel, _SP):
 		self.outputChanged=1
 		if _SP==0:
 			self.output=jeedom_utils.clearBit(self.output,_channel)
 		else :
-			self.output=jeedom_utils.setBit(self.output,_channel)	
+			self.output=jeedom_utils.setBit(self.output,_channel)
+			
 # input methodes
 	def inputIsSet(self, _id) :
 		if jeedom_utils.testBit(self.input,_id)==0:
 			return 0
 		else :
 			return 1
+			
 # output feedback methodes		
 		# status of the output feedback
 	def outputIsSet(self, _id) :
@@ -282,12 +281,13 @@ def splitbyte(_byte):
 def findCardAdress(_address):
 	if len(Eqts) == 0:
 		return None
-	else :
+	else:
 		for eqt in Eqts:
- 			if eqt.address == _address :
- 				return eqt
- 		else:
- 			return None
+			if eqt.address == _address :
+				logging.info("find card")	 
+				return eqt
+		else:
+			return None
 	
 # ----------------------------------------------------------------------------			
 def read_socket():
@@ -302,12 +302,14 @@ def read_socket():
 			if message['apikey'] != _apikey:
 				raise KeyError()
 						
+ 			
 			card=findCardAdress(address)
-						
+
+			
 			if card == None:
 				if message['cmd'] == 'add':
 					#logging.debug("Add the device with @:" + str(address)) 
-					Eqts.append(IN8R8(address,board,[False,False,False,False,False,False,False,False]))				
+					Eqts.append(IN8R8(address,board,[False,False,False,False,False,False,False,False]))
 			
 			else:
 				if message['cmd'] == 'receive':
@@ -316,11 +318,11 @@ def read_socket():
 					if message['type'] == 'output':
 						card.routputChanged = 0
 						
-				if message['cmd'] == 'remove':
+				elif message['cmd'] == 'remove':
 					logging.debug("Remove the device with @:" + str(card.address))
 					card.remove(card.address)
 
-				if message['cmd'] == 'send':
+				elif message['cmd'] == 'send':
 					if 'channel' in str(message):
 						for i in range(card.outputchannel):
 							if ('channel' + str(i)) in str(message):
@@ -344,14 +346,14 @@ def read_socket():
 # ----------------------------------------------------------------------------
 def read_i2cbus():
 	for eqt in Eqts:		# Loop for each boards
-		if eqt.ComOK != 0:
+		if eqt.ComOK == 1:
 			eqt.readCardInput()			# read from board the input 
 			eqt.readCardOutput()		# read from board the output feedback
 
 # ----------------------------------------------------------------------------			
 def write_i2cbus():
 	for eqt in Eqts:		# Loop for each boards
-		if eqt.ComOK  != 0:
+		if eqt.ComOK == 1:
 			if eqt.outputChanged != 0:
 				eqt.write()				# Write to board the output
 
