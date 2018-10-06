@@ -23,6 +23,14 @@ class i2cExt_bouton extends eqLogic {
     /*     * *************************Attributs****************************** */
 
     /*     * ***********************Methode static*************************** */
+	public function preInsert()
+	{
+		$gceid = substr($this->getLogicalId(), strpos($this->getLogicalId(),"_")+2);
+		$this->setEqType_name('i2cExt_bouton');
+		$this->setIsEnable(0);
+		$this->setIsVisible(0);
+	}
+	
 	public function postInsert()
 	{
         $state = $this->getCmd(null, 'state');
@@ -98,12 +106,20 @@ class i2cExt_bouton extends eqLogic {
 		}	
 	}
 
-	public function preInsert()
+	public function postUpdate()
 	{
+		$CardeqLogic = eqLogic::byId(substr ($this->getLogicalId(), 0, strpos($this->getLogicalId(),"_")));
 		$gceid = substr($this->getLogicalId(), strpos($this->getLogicalId(),"_")+2);
-		$this->setEqType_name('i2cExt_bouton');
-		$this->setIsEnable(0);
-		$this->setIsVisible(0);
+		$repli = $this->getConfiguration('input');
+		log::add('i2cExt','debug',"repli " . $repli);
+		
+		$message = trim(json_encode(array('apikey' => jeedom::getApiKey('i2cExt'), 'cmd' => 'reply','board' => $CardeqLogic->getConfiguration('board'), 'address' => $CardeqLogic->getConfiguration('address'), 'channel' => $gceid , 'value' => $repli)));
+		$socket = socket_create(AF_INET, SOCK_STREAM, 0);
+		socket_connect($socket, '127.0.0.1', config::byKey('socketport', 'i2cExt'));
+		socket_write($socket, trim($message), strlen(trim($message)));
+		socket_close($socket);
+
+		log::add('i2cExt','debug',"send " . $message);
 	}
 
     public static function event() {

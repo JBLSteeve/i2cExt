@@ -52,9 +52,10 @@ except ImportError:
 	sys.exit(1)
 
 # ----------------------------------------------------------------------------
-class CARDS(object):
+#class CARDS(object):
+class CARDS:
 	__metaclass__ = ABCMeta	
-	#Register = namedtuple('Register', ['W_OUTPUT', 'R_OUTPUT', 'R_INPUT', 'W_HBEAT', 'R_HBEAT', 'R_VERSION'])				
+	Register = namedtuple('Register', ['W_OUTPUT', 'R_OUTPUT', 'R_INPUT', 'W_HBEAT', 'R_HBEAT', 'R_VERSION'])				
 
 	def __init__(self, _cardAddress,_board):
 		if (not isinstance(_cardAddress, int)):
@@ -65,9 +66,9 @@ class CARDS(object):
 		self.hbeat=0
 		self._status=0
 		self._status=self.manageHbeat(0)	
-		self.version=self.aboutVersion()
+		self._version=self.aboutVersion()
 		#self.Register = namedtuple("Register",["W_OUTPUT", "R_OUTPUT", "R_INPUT", "W_HBEAT", "R_HBEAT", "R_VERSION"])
-		#self._register = self.Register(W_OUTPUT=66, R_OUTPUT=65, R_INPUT=80, W_HBEAT=96, R_HBEAT=97, R_VERSION=144)
+		self._register = CARDS.Register(W_OUTPUT=66, R_OUTPUT=65, R_INPUT=80, W_HBEAT=96, R_HBEAT=97, R_VERSION=144)
 		
 	def manageHbeat(self, hbeat_value):
 		'''Check communication with cards
@@ -81,6 +82,7 @@ class CARDS(object):
 		- 0 : No communication
 		- 1 : Online
 		'''
+		#logging.debug("Test :" + str(self._register.W_OUTPUT))
 		new_hbeat = jeedom_i2c.read(self.address,R_HBEAT)
 		if(new_hbeat != self.hbeat):
 			if(self._status ==0):
@@ -103,9 +105,9 @@ class CARDS(object):
 		When called, request card hardware version through i2c connection and return it.
 		'''
 		if(self.ComOK==1):
-			self.version = self.readCommand(R_VERSION)
-			logging.info("The I2C card with the @:" + str(self.address) + " is in the version :" + str(self.version))
-			return self.version
+			self._version = self.readCommand(R_VERSION)
+			logging.info("The I2C card with the @:" + str(self.address) + " is in the version :" + str(self._version))
+			return self._version
 		
 	def writeCommand(self,_command,_value):
 		'''Send raw command through i2c
@@ -128,7 +130,7 @@ class CARDS(object):
 			value = jeedom_i2c.read(self.address,_command)
 			logging.debug("Read command :" + str(_command) + " value :" + str(value) + " for board @:" + str(self.address))
 			return value
-		
+
 	@property
 	def ComOK(self):
 		return self._status
@@ -198,7 +200,17 @@ class IN8R8(CARDS):
 			self.output=jeedom_utils.clearBit(self.output,_channel)
 		else :
 			self.output=jeedom_utils.setBit(self.output,_channel)
-			
+	
+	# set the reply input
+	def replyInput(self, _channel, _SP):
+		if _channel < self.outputchannel :
+			if _SP==0:
+				self.reply_input[_channel]=False
+			else :
+				self.reply_input[_channel]=True
+				
+		#logging.debug("reply input : " + str(_channel) + " is set to : " + str(_SP) ) 
+				
 # input methodes
 	def inputIsSet(self, _id) :
 		if jeedom_utils.testBit(self.input,_id)==0:
@@ -284,7 +296,6 @@ def findCardAdress(_address):
 	else:
 		for eqt in Eqts:
 			if eqt.address == _address :
-				logging.info("find card")	 
 				return eqt
 		else:
 			return None
@@ -334,6 +345,12 @@ def read_socket():
 						else:
 							for i in range(card.outputchannel):
 								card.newSP(i, 0)
+								
+				elif message['cmd'] == 'reply':	
+					if 'channel' in str(message):
+						if 'value' in str(message):	
+							card.replyInput(int(message['channel']),int(message['value']))
+								
 								
 	except TypeError as te:
 		logging.error('Error on read socket : '+ str(te) + str(message))

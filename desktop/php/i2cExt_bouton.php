@@ -45,7 +45,15 @@
 					<label class="checkbox-inline"><input type="checkbox" class="eqLogicAttr" data-label-text="{{Visible}}" data-l1key="isVisible" checked/>Visible</label>
 					</div>
                 </div>
-
+        	   <div class="form-group">
+                	<label class="col-sm-2 control-label">{{Valeur de repli}}</label>
+					<div class="col-sm-2">
+                        <select class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="input">
+                            <option value=0 id="status">False</option>
+							<option value=1 id="status">True</option>
+                        </select>
+                    </div>
+                </div>
                 
             </fieldset> 
         </form>
