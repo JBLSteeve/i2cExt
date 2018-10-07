@@ -389,7 +389,7 @@ class i2cExt extends eqLogic {
 		
 	public function getImage() {
 			// A faire
-			return 'plugin/i2cExt/core/config/device/' . $this->getConfiguration('board') . '.png';
+			return 'plugin/i2cExt/core/config/device/' . $this->getConfiguration('board') . '.jpg';
 	}
     
 	public function scan() {

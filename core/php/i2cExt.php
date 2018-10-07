@@ -94,8 +94,6 @@ foreach ($result['devices'] as $key => $device)// decodage de l'entete
 										//$statuscmd->setCollectDate(date('Y-m-d H:i:s'));
 										#$cmd->event($recu);
 										#$cmd->setConfiguration('value',$recu);
-										//$test = $SubeqLogicInput->getConfiguration('input');
-										//log::add('i2cExt','debug',' test' . $test );
 										if ( $input['channel' . $compteurId] == 'Pulse') {
 											//log::add('i2cExt','debug',' channel' . $compteurId . ':Pulse');
 											$statuscmd->event(100);

@@ -23,14 +23,6 @@ class i2cExt_bouton extends eqLogic {
     /*     * *************************Attributs****************************** */
 
     /*     * ***********************Methode static*************************** */
-	public function preInsert()
-	{
-		$gceid = substr($this->getLogicalId(), strpos($this->getLogicalId(),"_")+2);
-		$this->setEqType_name('i2cExt_bouton');
-		$this->setIsEnable(0);
-		$this->setIsVisible(0);
-	}
-	
 	public function postInsert()
 	{
         $state = $this->getCmd(null, 'state');
@@ -104,6 +96,14 @@ class i2cExt_bouton extends eqLogic {
 			$state->setTemplate('mobile', 'light');
 			$state->save();
 		}	
+	}
+
+	public function preInsert()
+	{
+		$gceid = substr($this->getLogicalId(), strpos($this->getLogicalId(),"_")+2);
+		$this->setEqType_name('i2cExt_bouton');
+		$this->setIsEnable(0);
+		$this->setIsVisible(0);
 	}
 
     public static function event() {

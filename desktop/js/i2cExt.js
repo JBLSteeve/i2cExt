@@ -161,6 +161,7 @@ function getCardAddress() {
 
 function printEqLogic(_eqLogic) {
 
+	
      if (!isset(_eqLogic)) {
         var _eqLogic = {configuration: {}};
     }
@@ -170,7 +171,7 @@ function printEqLogic(_eqLogic) {
     }
 
 
-            updateAddressEqLogicList(getCardAddress());
+    updateAddressEqLogicList(getCardAddress());
 
 
     $('body').setValues(_eqLogic, '.eqLogicAttr'); 
@@ -178,8 +179,8 @@ function printEqLogic(_eqLogic) {
 }
 
 function updateAddressEqLogicList(_listEqLogicByType) {
-    var optionList =['<option value="none" selected>{{Non affectées}}</option>'];
-switch($('[data-l1key=configuration][data-l2key=board]'.val())){
+    var optionList =['<option value="none" selected>{{Non affectée}}</option>'];
+switch($('[data-l1key=configuration][data-l2key=board]').val()){
 	case 'IN8R8':
     	for (var i = 0; i < _listEqLogicByType.IN8R8_Address.length; i++) {
         	optionList.push('<option value="', _listEqLogicByType.IN8R8_Address[i], '"');

@@ -30,20 +30,20 @@ try {
             if (!is_object($eqLogic)) {
                 continue;
             }
-           switch ($eqLogic->getConfiguration('board')) {
+           /*switch ($eqLogic->getConfiguration('board')) {
                 case 'IN8R8':
-                    $search = array_search($eqLogic->getConfiguration('adress'), $return['IN8R8_Address'] );
+                    $search = array_search($eqLogic->getConfiguration('address'), $return['IN8R8_Address'] );
                                     if ($search !== false) {
                                         unset($return['IN8R8_Address'][$search]);
                                     }
-                     break;
+                    /* break;
                 case 'IN4DIM4':
-                    $search = array_search($eqLogic->getConfiguration('adress'), $return['IN4DIM4_Address'] );
+                    $search = array_search($eqLogic->getConfiguration('address'), $return['IN4DIM4_Address'] );
                                     if ($search !== false) {
                                         unset($return['IN4DIM4_Address'][$search]);
                                     }
                      break;
-            }
+            }*/
         }
         ajax::success($return);
     }
