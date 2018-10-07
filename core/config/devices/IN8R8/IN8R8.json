@@ -1,0 +1,486 @@
+{
+    "100": {
+        "name": "Carte relais",
+        "actuator" : "1",
+        "subtype": {
+            "01": {
+                "name": "IN8R8",
+                "commands": [
+                    {
+                        "name": "Relais_0",
+                        "type": "info",
+                        "subtype": "binary",
+                        "display": {
+		                    "generic_type": "LIGHT_STATE",
+							"forceReturnLineBefore": "1",
+							"forceReturnLineAfter": "1"
+		                },
+                        "isVisible": 0,
+                        "isHistorized": 0,
+                        "logicalId": "#ID#::0",
+                        "unite": "0",
+                        "eventOnly": 1,
+						"order": 0
+                    },
+                    {
+                        "name": "Relais_0_ON",
+                        "type": "action",
+                        "subtype": "other",
+                        "display": {
+		                    "generic_type": "LIGHT_ON",
+							"forceReturnLineBefore": "1",
+							"forceReturnLineAfter": "0"
+		                },
+                        "template": {
+		                    "dashboard": "light",
+							"mobile": "light"
+		                },
+                        "isVisible": 1,
+                        "logicalId": "#ID#::0:100",
+						"value": "Relais_0",
+                        "configuration" : {
+                            "updateCmdId": "Relais_0",
+                            "updateCmdToValue": "1"
+                        },
+						"order": 1
+                    },
+                    {
+                        "name": "Relais_0_OFF",
+                        "type": "action",
+                        "subtype": "other",
+                        "display": {
+		                    "generic_type": "LIGHT_OFF",
+							"forceReturnLineBefore": "0",
+							"forceReturnLineAfter": "1"
+		                },
+                        "template": {
+		                    "dashboard": "light",
+							"mobile": "light"
+		                },
+                        "isVisible": 1,
+                        "logicalId": "#ID#::0:0",
+						"value": "Relais_0",
+                        "configuration" : {
+                            "updateCmdId": "Relais_0",
+                            "updateCmdToValue": "0"
+                        },
+						"order": 2
+                    },
+                    {
+                        "name": "Relais_1",
+                        "type": "info",
+                        "subtype": "binary",
+                        "display": {
+		                    "generic_type": "LIGHT_STATE",
+							"forceReturnLineBefore": "1",
+							"forceReturnLineAfter": "1"
+		                },
+                        "isVisible": 0,
+                        "isHistorized": 0,
+                        "unite": "",
+                        "eventOnly": 1,
+						"order": 3
+                    },
+                    {
+                        "name": "Relais_1_ON",
+                        "type": "action",
+                        "subtype": "other",
+                        "display": {
+		                    "generic_type": "LIGHT_ON",
+							"forceReturnLineBefore": "1",
+							"forceReturnLineAfter": "0"
+		                },
+                        "template": {
+		                    "dashboard": "light",
+							"mobile": "light"
+		                },
+                        "isVisible": 1,
+                        "logicalId": "#ID#::1:100",
+						"value": "Relais_1",
+                        "configuration" : {
+                            "updateCmdId": "Relais_1",
+                            "updateCmdToValue": "1"
+                        },
+						"order": 4
+                    },
+                    {
+                        "name": "Relais_1_OFF",
+                        "type": "action",
+                        "subtype": "other",
+                        "display": {
+		                    "generic_type": "LIGHT_OFF",
+							"forceReturnLineBefore": "0",
+							"forceReturnLineAfter": "1"
+		                },
+                        "template": {
+		                    "dashboard": "light",
+							"mobile": "light"
+		                },
+                        "isVisible": 1,
+                        "logicalId": "#ID#::1:0",
+						"value": "Relais_1",
+                        "configuration" : {
+                            "updateCmdId": "Relais_1",
+                            "updateCmdToValue": "0"
+                        },
+						"order": 5
+                    },     
+                    {
+                        "name": "Relais_2",
+                        "type": "info",
+                        "subtype": "binary",
+                        "display": {
+		                    "generic_type": "LIGHT_STATE",
+							"forceReturnLineBefore": "1",
+							"forceReturnLineAfter": "1"
+		                },
+                        "isVisible": 0,
+                        "isHistorized": 0,
+                        "unite": "",
+                        "eventOnly": 1,
+						"order": 6
+                    },
+                    {
+                        "name": "Relais_2_ON",
+                        "type": "action",
+                        "subtype": "other",
+                        "display": {
+		                    "generic_type": "LIGHT_ON",
+							"forceReturnLineBefore": "1",
+							"forceReturnLineAfter": "0"
+		                },
+                        "template": {
+		                    "dashboard": "light",
+							"mobile": "light"
+		                },
+                        "isVisible": 1,
+                        "logicalId": "#ID#::2:100",
+						"value": "Relais_2",
+                        "configuration" : {
+                            "updateCmdId": "Relais_2",
+                            "updateCmdToValue": "1"
+                        },
+						"order": 7
+                    },
+                    {
+                        "name": "Relais_2_OFF",
+                        "type": "action",
+                        "subtype": "other",
+                        "display": {
+		                    "generic_type": "LIGHT_OFF",
+							"forceReturnLineBefore": "0",
+							"forceReturnLineAfter": "1"
+		                },
+                        "template": {
+		                    "dashboard": "light",
+							"mobile": "light"
+		                },
+                        "isVisible": 1,
+                        "logicalId": "#ID#::2:0",
+						"value": "Relais_2",
+                        "configuration" : {
+                            "updateCmdId": "Relais_2",
+                            "updateCmdToValue": "0"
+                        },
+						"order": 8
+                    },
+                    {
+                        "name": "Relais_3",
+                        "type": "info",
+                        "subtype": "binary",
+                        "display": {
+		                    "generic_type": "LIGHT_STATE",
+							"forceReturnLineBefore": "1",
+							"forceReturnLineAfter": "1"
+		                },
+                        "isVisible": 0,
+                        "isHistorized": 0,
+                        "unite": "",
+                        "eventOnly": 1,
+						"order": 9
+                    },
+                    {
+                        "name": "Relais_3_ON",
+                        "type": "action",
+                        "subtype": "other",
+                        "display": {
+		                    "generic_type": "LIGHT_ON",
+							"forceReturnLineBefore": "1",
+							"forceReturnLineAfter": "0"
+		                },
+                        "template": {
+		                    "dashboard": "light",
+							"mobile": "light"
+		                },
+                        "isVisible": 1,
+                        "logicalId": "#ID#::3:100",
+						"value": "Relais_3",
+                        "configuration" : {
+                            "updateCmdId": "Relais_3",
+                            "updateCmdToValue": "1"
+                        },
+						"order": 10
+                    },
+                    {
+                        "name": "Relais_3_OFF",
+                        "type": "action",
+                        "subtype": "other",
+                        "display": {
+		                    "generic_type": "LIGHT_OFF",
+							"forceReturnLineBefore": "0",
+							"forceReturnLineAfter": "1"
+		                },
+                        "template": {
+		                    "dashboard": "light",
+							"mobile": "light"
+		                },
+                        "isVisible": 1,
+                        "logicalId": "#ID#::3:0",
+						"value": "Relais_3",
+                        "configuration" : {
+                            "updateCmdId": "Relais_3",
+                            "updateCmdToValue": "0"
+                        },
+						"order": 11
+                    },
+                    {
+                        "name": "Relais_4",
+                        "type": "info",
+                        "subtype": "binary",
+                        "display": {
+		                    "generic_type": "LIGHT_STATE",
+							"forceReturnLineBefore": "1",
+							"forceReturnLineAfter": "1"
+		                },
+                        "isVisible": 0,
+                        "isHistorized": 0,
+                        "unite": "",
+                        "eventOnly": 1,
+						"order": 12
+                    },
+                    {
+                        "name": "Relais_4_ON",
+                        "type": "action",
+                        "subtype": "other",
+                        "display": {
+		                    "generic_type": "LIGHT_ON",
+							"forceReturnLineBefore": "1",
+							"forceReturnLineAfter": "0"
+		                },
+                        "template": {
+		                    "dashboard": "light",
+							"mobile": "light"
+		                },
+                        "isVisible": 1,
+                        "logicalId": "#ID#::4:100",
+						"value": "Relais_4",
+                        "configuration" : {
+                            "updateCmdId": "Relais_4",
+                            "updateCmdToValue": "1"
+                        },
+						"order": 13
+                    },
+                    {
+                        "name": "Relais_4_OFF",
+                        "type": "action",
+                        "subtype": "other",
+                        "display": {
+		                    "generic_type": "LIGHT_OFF",
+							"forceReturnLineBefore": "0",
+							"forceReturnLineAfter": "1"
+		                },
+                        "template": {
+		                    "dashboard": "light",
+							"mobile": "light"
+		                },
+                        "isVisible": 1,
+                        "logicalId": "#ID#::4:0",
+						"value": "Relais_4",
+                        "configuration" : {
+                            "updateCmdId": "Relais_4",
+                            "updateCmdToValue": "0"
+                        },
+						"order": 14
+                    },
+                    {
+                        "name": "Relais_5",
+                        "type": "info",
+                        "subtype": "binary",
+                        "display": {
+		                    "generic_type": "LIGHT_STATE",
+							"forceReturnLineBefore": "1",
+							"forceReturnLineAfter": "1"
+		                },
+                        "isVisible": 0,
+                        "isHistorized": 0,
+                        "unite": "",
+                        "eventOnly": 1,
+						"order": 15
+                    },
+                    {
+                        "name": "Relais_5_ON",
+                        "type": "action",
+                        "subtype": "other",
+                        "display": {
+		                    "generic_type": "LIGHT_ON",
+							"forceReturnLineBefore": "1",
+							"forceReturnLineAfter": "0"
+		                },
+                        "template": {
+		                    "dashboard": "light",
+							"mobile": "light"
+		                },
+                        "isVisible": 1,
+                        "logicalId": "#ID#::5:100",
+						"value": "Relais_5",
+                        "configuration" : {
+                            "updateCmdId": "Relais_5",
+                            "updateCmdToValue": "1"
+                        },
+						"order": 16
+                    },
+                    {
+                        "name": "Relais_5_OFF",
+                        "type": "action",
+                        "subtype": "other",
+                        "display": {
+		                    "generic_type": "LIGHT_OFF",
+							"forceReturnLineBefore": "0",
+							"forceReturnLineAfter": "1"
+		                },
+                        "template": {
+		                    "dashboard": "light",
+							"mobile": "light"
+		                },
+                        "isVisible": 1,
+                        "logicalId": "#ID#::5:0",
+						"value": "Relais_5",
+                        "configuration" : {
+                            "updateCmdId": "Relais_5",
+                            "updateCmdToValue": "0"
+                        },
+						"order": 17
+                    },
+                    {
+                        "name": "Relais_6",
+                        "type": "info",
+                        "subtype": "binary",
+                        "display": {
+		                    "generic_type": "LIGHT_STATE",
+							"forceReturnLineBefore": "1",
+							"forceReturnLineAfter": "1"
+		                },
+                        "isVisible": 0,
+                        "isHistorized": 0,
+                        "unite": "",
+                        "eventOnly": 1,
+						"order": 18
+                    },
+                    {
+                        "name": "Relais_6_ON",
+                        "type": "action",
+                        "subtype": "other",
+                        "display": {
+		                    "generic_type": "LIGHT_ON",
+							"forceReturnLineBefore": "1",
+							"forceReturnLineAfter": "0"
+		                },
+                        "template": {
+		                    "dashboard": "light",
+							"mobile": "light"
+		                },
+                        "isVisible": 1,
+                        "logicalId": "#ID#::6:100",
+						"value": "Relais_6",
+                        "configuration" : {
+                            "updateCmdId": "Relais_6",
+                            "updateCmdToValue": "1"
+                        },
+						"order": 19
+                    },
+                    {
+                        "name": "Relais_6_OFF",
+                        "type": "action",
+                        "subtype": "other",
+                        "display": {
+		                    "generic_type": "LIGHT_OFF",
+							"forceReturnLineBefore": "0",
+							"forceReturnLineAfter": "1"
+		                },
+                        "template": {
+		                    "dashboard": "light",
+							"mobile": "light"
+		                },
+                        "isVisible": 1,
+                        "logicalId": "#ID#::6:0",
+						"value": "Relais_6",
+                        "configuration" : {
+                            "updateCmdId": "Relais_6",
+                            "updateCmdToValue": "0"
+                        },
+						"order": 20
+                    },
+                    {
+                        "name": "Relais_7",
+                        "type": "info",
+                        "subtype": "binary",
+                        "display": {
+		                    "generic_type": "LIGHT_STATE",
+							"forceReturnLineBefore": "1",
+							"forceReturnLineAfter": "1"
+		                },
+                        "isVisible": 0,
+                        "isHistorized": 0,
+                        "unite": "",
+                        "eventOnly": 1,
+						"order": 21
+                    },
+                    {
+                        "name": "Relais_7_ON",
+                        "type": "action",
+                        "subtype": "other",
+                        "display": {
+		                    "generic_type": "LIGHT_ON",
+							"forceReturnLineBefore": "1",
+							"forceReturnLineAfter": "0"
+		                },
+                        "template": {
+		                    "dashboard": "light",
+							"mobile": "light"
+		                },
+                        "isVisible": 1,
+                        "logicalId": "#ID#::7:100",
+						"value": "Relais_7",
+                        "configuration" : {
+                            "updateCmdId": "Relais_7",
+                            "updateCmdToValue": "1"
+                        },
+						"order": 22
+                    },
+                    {
+                        "name": "Relais_7_OFF",
+                        "type": "action",
+                        "subtype": "other",
+                        "display": {
+		                    "generic_type": "LIGHT_OFF",
+							"forceReturnLineBefore": "0",
+							"forceReturnLineAfter": "1"
+		                },
+                        "template": {
+		                    "dashboard": "light",
+							"mobile": "light"
+		                },
+                        "isVisible": 1,
+                        "logicalId": "#ID#::7:0",
+						"value": "Relais_7",
+                        "configuration" : {
+                            "updateCmdId": "Relais_7",
+                            "updateCmdToValue": "0"
+                        },
+						"order": 23
+                    }
+                ]
+            }
+        }
+    }
+}
