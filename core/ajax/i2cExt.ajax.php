@@ -19,22 +19,38 @@
 try {
     require_once dirname(__FILE__) . '/../../../../core/php/core.inc.php';
     include_file('core', 'authentification', 'php');
-
     if (!isConnect('admin')) {
         throw new Exception(__('401 - Accès non autorisé', __FILE__));
     }
 
-    if (init('action') == 'configPush') {
-    	log::add('i2cExt','debug',"test1");
-        $eqLogic = i2cExt::byId(init('id'));
-        if (!is_object($eqLogic)) {
-            throw new Exception(__('i2cExt eqLogic non trouvé : ', __FILE__) . init('id'));
+    if (init('action') === 'getCardAddress') {
+        $return['IN8R8_Address'] = ['0x53','0x54'];
+        $return['IN4DIM4_Address'] = ['0x20','0x21'];
+        foreach (eqLogic::byType('i2cExt') as $eqLogic) {
+            if (!is_object($eqLogic)) {
+                continue;
+            }
+           switch ($eqLogic->getConfiguration('board')) {
+                case 'IN8R8':
+                    $search = array_search($eqLogic->getConfiguration('adress'), $return['IN8R8_Address'] );
+                                    if ($search !== false) {
+                                        unset($return['IN8R8_Address'][$search]);
+                                    }
+                     break;
+                case 'IN4DIM4':
+                    $search = array_search($eqLogic->getConfiguration('adress'), $return['IN4DIM4_Address'] );
+                                    if ($search !== false) {
+                                        unset($return['IN4DIM4_Address'][$search]);
+                                    }
+                     break;
+            }
         }
+        ajax::success($return);
     }
 
-    throw new Exception(__('Aucune methode correspondante à : ', __FILE__) . init('action'));
-    /*     * *********Catch exeption*************** */
+    throw new Exception(__('Aucune méthode correspondante à : ', __FILE__) . init('action'));
+    /***********Catch exception***************/
 } catch (Exception $e) {
-    ajax::error(displayExeption($e), $e->getCode());
+    ajax::error(displayException($e), $e->getCode());
 }
 ?>

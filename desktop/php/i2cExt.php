@@ -140,23 +140,24 @@ $eqLogics = eqLogic::byType('i2cExt');
         	   <div class="form-group">
                 	<label class="col-sm-3 control-label">{{Modèle de la carte}}</label>
 					<div class="col-sm-3">
-                        <select class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="board">
-                            <option value="" id="select_board">Aucune</option>
-                            <option value="8IN8R" id="select_board">IN8R8</option>
-							<option value="IN4DIM4" id="select_board">IN4DIM4</option>
+                        <select class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="board"
+                          onchange="if(this.selectedIndex == 0) document.getElementById('i2cExt_address').style.display = 'none';
+					 	 	else document.getElementById('i2cExt_address').style.display = 'block';">
+                            <option value="" >Aucune</option>
+                            <option value="IN8R8" >IN8R8</option>
+							<option value="IN4DIM4" >IN4DIM4</option>
                         </select>
                     </div>
                 </div>
-				<div class="form-group">
-					<label class="col-sm-3 control-label" >{{Adresse I2C de la carte}}</label>
-					<div class="col-sm-2">
-					   <select class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="address">
-					   		<option value="" id="select_i2c_board"></option>
-							<option value="83" id="select_i2c_board">0x53 (83)</option>
-							<option value="84" id="select_i2c_board">0x54 (33)</option>
-						</select>
-					</div>
-				</div>
+				<div id="i2cExt_address">
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" >{{Adresse I2C de la carte}}</label>
+                        <div class="col-sm-2">
+                            <select id="eqType" class="eqLogicAttr form-control cursor" data-l1key="configuration" data-l2key="address">
+                            </select>
+                        </div>
+                    </div>
+                </div>
             </fieldset> 
         </form>
 

@@ -224,7 +224,7 @@ class i2cExt extends eqLogic {
 				$eqLogic = new i2cExt_bouton();
 				$eqLogic->setLogicalId($this->getId().'_B'.$compteurId);
 				$eqLogic->setName('Bouton ' . ($compteurId+1));
-				$eqLogic->setObject_id($compteurId+1);
+				$eqLogic->setEqRealId($compteurId+1);
 				$eqLogic->save();
 			}
 		}
@@ -342,6 +342,7 @@ class i2cExt extends eqLogic {
 				$all_off->save();
 			}
 		}
+		
 	}
 
 	public function getChildEq(){

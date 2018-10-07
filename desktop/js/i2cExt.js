@@ -131,6 +131,72 @@ function addCmdToTable(_cmd) {
     }
 }
 
+// Ajout pour les adresses des cartes
+function getCardAddress() {
+    var eqLogic = new Object();
+    $.ajax({
+        type: 'POST',
+        async: false,
+        url: 'plugins/i2cExt/core/ajax/i2cExt.ajax.php',
+        data: {
+            action: 'getCardAddress'
+        },
+        dataType: 'json',
+        global: false,
+        error: function (request, status, error) {
+            handleAjaxError(request, status, error);
+        },
+        success: function (data) {
+            if (data.state != 'ok') {
+                $('#div_alert').showAlert({message: data.result, level: 'danger'});
+                return;
+            }
+            if (data.result.length != 0) {
+                eqLogic = data.result;
+            }
+        }
+    });
+    return eqLogic;
+}
+
+function printEqLogic(_eqLogic) {
+
+     if (!isset(_eqLogic)) {
+        var _eqLogic = {configuration: {}};
+    }
+
+    if (!isset(_eqLogic.configuration)) {
+        _eqLogic.configuration = {};
+    }
+
+
+            updateAddressEqLogicList(getCardAddress());
+
+
+    $('body').setValues(_eqLogic, '.eqLogicAttr'); 
+
+}
+
+function updateAddressEqLogicList(_listEqLogicByType) {
+    var optionList =['<option value="none" selected>{{Non affectées}}</option>'];
+switch($('[data-l1key=configuration][data-l2key=board]'.val())){
+	case 'IN8R8':
+    	for (var i = 0; i < _listEqLogicByType.IN8R8_Address.length; i++) {
+        	optionList.push('<option value="', _listEqLogicByType.IN8R8_Address[i], '"');
+         	optionList.push('>', _listEqLogicByType.IN8R8_Address[i], '</option>');
+    	}
+	break;
+	case 'IN4DIM4':
+  		for (var i = 0; i < _listEqLogicByType.IN4DIM4_Address.length; i++) {
+        	optionList.push('<option value="', _listEqLogicByType.IN4DIM4_Address[i], '"');
+         	optionList.push('>', _listEqLogicByType.IN4DIM4_Address[i], '</option>');
+    	}
+	break;
+}
+
+    $('[data-l1key=configuration][data-l2key=address]').html(optionList.join(''));
+}
+
 $('.eqLogicAction[data-action=hide]').on('click', function () {
     var eqLogic_id = $(this).attr('data-eqLogic_id');
     $('.sub-nav-list').each(function () {

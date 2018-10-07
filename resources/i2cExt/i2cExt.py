@@ -200,16 +200,6 @@ class IN8R8(CARDS):
 			self.output=jeedom_utils.clearBit(self.output,_channel)
 		else :
 			self.output=jeedom_utils.setBit(self.output,_channel)
-	
-	# set the reply input
-	def replyInput(self, _channel, _SP):
-		if _channel < self.outputchannel :
-			if _SP==0:
-				self.reply_input[_channel]=False
-			else :
-				self.reply_input[_channel]=True
-				
-		#logging.debug("reply input : " + str(_channel) + " is set to : " + str(_SP) ) 
 				
 # input methodes
 	def inputIsSet(self, _id) :
@@ -345,13 +335,7 @@ def read_socket():
 						else:
 							for i in range(card.outputchannel):
 								card.newSP(i, 0)
-								
-				elif message['cmd'] == 'reply':	
-					if 'channel' in str(message):
-						if 'value' in str(message):	
-							card.replyInput(int(message['channel']),int(message['value']))
-								
-								
+																
 	except TypeError as te:
 		logging.error('Error on read socket : '+ str(te) + str(message))
 	except KeyError as ke:
