@@ -32,7 +32,7 @@ from os.path import join
 import json
 from collections import namedtuple
 from abc import ABCMeta, abstractmethod
-
+from threading import Thread, Event, Lock
 
 # Card Registers
 W_OUTPUT=66 #0x42
@@ -382,26 +382,20 @@ def cards_hbeat():
 		eqt.manageHbeat(eqt.hbeat)
 
 # ----------------------------------------------------------------------------	
-def main():
-	logging.debug("Start ...")
-	# Start I2C
-	jeedom_i2c.open()
-	jeedom_socket.open()
+def main(ioLock, stopEvent):
 	logging.debug("Start deamon")
 	try:
 		while 1:
-			#Faire toutes les secondes
-			cards_hbeat()
-			
 			time.sleep(0.1)
-			
-			# Read i2c bus for boards inputs
-			read_i2cbus()
-			# write i2c bus for boards outputs
-			write_i2cbus()	
-			
+			with ioLock:
+				# Read i2c bus for boards inputs
+				read_i2cbus()
+				# write i2c bus for boards outputs
+				write_i2cbus()	
+				
 			# Read from jeedom socket request
 			read_socket()
+			#Release lock
 
 			
 	except KeyboardInterrupt:
@@ -415,6 +409,13 @@ def handler(signum=None, frame=None):
 # - Shutdown ---------------------------------------------------------------------------
 def shutdown():
 	logging.debug("Shutdown")
+	logging.debug("Removing PID file " + str(_pidfile))
+	
+	#Request halt of communication check thread
+	_stop.set()
+	#Wait for task to close
+	_ComOKThread.join()
+
 	logging.debug("Removing PID file " + str(_pidfile))
 	try:
 		os.remove(_pidfile)
@@ -432,6 +433,20 @@ def shutdown():
 	sys.stdout.flush()
 	os._exit(0)
 
+# - Threading functions --------------------------------------------------------------------
+def CommunicationCheck(stopEvent, ioLock, period):
+
+	while not StopEvent.isset():
+		#Get lock
+		ioLock.acquire()
+		#Get hearbit of all cards
+		cards_hbeat()
+		#release lock
+		ioLock.release()
+
+		#Wait for the given period before or a stopEvent (this enable to quit without waiting for a full period)
+		stopEvent.wait(period)
+
 # - Main program ---------------------------------------------------------------------------
 _log_level = "error"
 _socket_port = 55550
@@ -440,6 +455,7 @@ _device = '1'
 _pidfile = '/tmp/i2cExt.pid'
 _apikey = ''
 _callback = ''
+_refreshPeriod = 1.0
 _cycle = 0.3
 parser = argparse.ArgumentParser(description='i2cExt Daemon for Jeedom plugin')
 parser.add_argument("--device", help="Device", type=str)
@@ -449,6 +465,7 @@ parser.add_argument("--callback", help="Callback", type=str)
 parser.add_argument("--apikey", help="Apikey", type=str)
 parser.add_argument("--cycle", help="Cycle to send event", type=str)
 parser.add_argument("--pid", help="Pid file", type=str)
+parser.add_argument("--refreshPeriod", help="Heartbit pooling period (in seconds, default : 1s)", type=float)
 args = parser.parse_args()
 
 if args.device:
@@ -465,6 +482,8 @@ if args.pid:
 	_pidfile = args.pid
 if args.cycle:
 	_cycle = float(args.cycle)
+if args.refreshPeriod:
+	_refreshPeriod = args.refreshPeriod
 	
 jeedom_utils.set_log_level(_log_level)
 
@@ -477,6 +496,7 @@ logging.info('Device : '+str(_device))
 logging.info('Apikey : '+str(_apikey))
 logging.info('Callback : '+str(_callback))
 logging.info('Cycle : '+str(_cycle))
+logging.info('Refresh period : '+str(_refreshPeriod))
 
 _device=1
 if _device is None:
@@ -495,7 +515,20 @@ try:
 		shutdown()
 	jeedom_i2c = jeedom_i2c(port=_device)
 	jeedom_socket = jeedom_socket(port=_socket_port,address=_socket_host)
-	main()
+
+	logging.debug("Start ...")
+	# Start I2C
+	jeedom_i2c.open()
+	jeedom_socket.open()
+
+	logging.debug("Start communication check thread")
+
+	_ioLock = Lock()
+	_stop = Event()
+	_ComOKThread = Thread(name="ComOKTask", target=CommunicationCheck, args=(stopEvent, ioLock, _refreshPeriod,))
+
+	#Start main program
+	main(_ioLock)
 except:
 	logging.error('Fatal error : '+ str(sys.exc_info()[0]))
 	logging.debug(traceback.format_exc())
