@@ -24,26 +24,28 @@ try {
     }
 
     if (init('action') === 'getCardAddress') {
-        $return['IN8R8_Address'] = ['0x53','0x54'];
-        $return['IN4DIM4_Address'] = ['0x20','0x21'];
+        $return['IN8R8_Address'] = ['0x53','0x54','0x55','0x56','0x57','0x58','0x59','0x5A','0x5B','0x5C','0x5D','0x5E','0x5F','0x60','0x61','0x62'];
+        $return['IN4DIM4_Address'] = ['0x20','0x21','0x22','0x23','0x24','0x25','0x26','0x27','0x28','0x29','0x2A','0x2B','0x2C','0x2D','0x2E','0x2F'];
         foreach (eqLogic::byType('i2cExt') as $eqLogic) {
             if (!is_object($eqLogic)) {
                 continue;
             }
-           /*switch ($eqLogic->getConfiguration('board')) {
-                case 'IN8R8':
-                    $search = array_search($eqLogic->getConfiguration('address'), $return['IN8R8_Address'] );
+        	//if ($MyeqLogic->getConfiguration('address') !=$eqLogic->getConfiguration('address')){
+           		switch ($eqLogic->getConfiguration('board')) {
+                	case 'IN8R8':
+                    	$search = array_search($eqLogic->getConfiguration('address'), $return['IN8R8_Address'] );
                                     if ($search !== false) {
-                                        unset($return['IN8R8_Address'][$search]);
+                                        //unset($return['IN8R8_Address'][$search]);
                                     }
-                    /* break;
-                case 'IN4DIM4':
-                    $search = array_search($eqLogic->getConfiguration('address'), $return['IN4DIM4_Address'] );
+                     	break;
+                	case 'IN4DIM4':
+                    	$search = array_search($eqLogic->getConfiguration('address'), $return['IN4DIM4_Address'] );
                                     if ($search !== false) {
-                                        unset($return['IN4DIM4_Address'][$search]);
+                                        //unset($return['IN4DIM4_Address'][$search]);
                                     }
                      break;
-            }*/
+            	}
+            //}
         }
         ajax::success($return);
     }
