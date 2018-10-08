@@ -131,7 +131,9 @@ function addCmdToTable(_cmd) {
     }
 }
 
+/////////////////////////////////////////////////////////////////////////////
 // Ajout pour les adresses des cartes
+/////////////////////////////////////////////////////////////////////////////
 function getCardAddress() {
     var eqLogic = new Object();
     $.ajax({
@@ -170,9 +172,20 @@ function printEqLogic(_eqLogic) {
         _eqLogic.configuration = {};
     }
 
-
-    updateAddressEqLogicList(getCardAddress());
-
+	var cardAddress = getCardAddress();
+	console.log(cardAddress);
+	switch(_eqLogic.configuration.board) {
+   	 case 'IN8R8':
+      	   cardAddress['IN8R8_Address'].push(_eqLogic.configuration.address);
+     	   break;
+   	 case 'IN4DIM4':
+    		cardAddress['IN4DIM4_Address'].push(_eqLogic.configuration.address);
+     	   break;
+   	 default:
+       	 break;
+	} 
+updateAddressEqLogicList(cardAddress);
+	
 
     $('body').setValues(_eqLogic, '.eqLogicAttr'); 
 

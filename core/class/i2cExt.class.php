@@ -128,7 +128,7 @@ class i2cExt extends eqLogic {
 		if ($this ->getLogicalId() ==''){
 				return;
 		}
-		$value = array('apikey' => jeedom::getApiKey('i2cExt'), 'cmd' => 'remove','address' => $this->getConfiguration('address'),'board' => $this->getConfiguration('board'));
+		$value = array('apikey' => jeedom::getApiKey('i2cExt'), 'cmd' => 'remove','address' => parseInt($this->getConfiguration('address')),'board' => $this->getConfiguration('board'));
 		$value = json_encode($value);
 		$socket = socket_create(AF_INET, SOCK_STREAM, 0);
 		socket_connect($socket, '127.0.0.1', config::byKey('socketport', 'i2cExt'));
@@ -138,7 +138,7 @@ class i2cExt extends eqLogic {
 
 	public function allowDevice() {
 		//OK
-		$value = array('apikey' => jeedom::getApiKey('i2cExt'), 'cmd' => 'add','address' => $this->getConfiguration('address'),'board' => $this->getConfiguration('board'));
+		$value = array('apikey' => jeedom::getApiKey('i2cExt'), 'cmd' => 'add','address' => parseInt($this->getConfiguration('address')),'board' => $this->getConfiguration('board'));
 		$value = json_encode($value);
 		$socket = socket_create(AF_INET, SOCK_STREAM, 0);
 		socket_connect($socket, '127.0.0.1', config::byKey('socketport', 'i2cExt'));
@@ -214,7 +214,7 @@ class i2cExt extends eqLogic {
 				$eqLogic = new i2cExt_relai();
 				$eqLogic->setLogicalId($this->getId().'_R'.$compteurId);
 				$eqLogic->setName('Relai ' . ($compteurId+1));
-				$eqLogic->setObject_id($compteurId+1);
+				//$eqLogic->setEqRealId($compteurId+1);
 				$eqLogic->save();
 			}
 		}
@@ -224,7 +224,7 @@ class i2cExt extends eqLogic {
 				$eqLogic = new i2cExt_bouton();
 				$eqLogic->setLogicalId($this->getId().'_B'.$compteurId);
 				$eqLogic->setName('Bouton ' . ($compteurId+1));
-				$eqLogic->setEqRealId($compteurId+1);
+				//$eqLogic->setEqRealId($compteurId+1);
 				$eqLogic->save();
 			}
 		}
@@ -245,7 +245,7 @@ class i2cExt extends eqLogic {
 				$eqLogic = new i2cExt_relai();
 				$eqLogic->setLogicalId($this->getId().'_R'.$compteurId);
 				$eqLogic->setName('Relai ' . ($compteurId+1));
-				$eqLogic->setObject_id($compteurId+1);
+				//$eqLogic->setEqRealId($compteurId+1);
 				$eqLogic->save();
 			}
 		}
@@ -255,7 +255,7 @@ class i2cExt extends eqLogic {
 				$eqLogic = new i2cExt_bouton();
 				$eqLogic->setLogicalId($this->getId().'_B'.$compteurId);
 				$eqLogic->setName('Bouton ' . ($compteurId+1));
-				$eqLogic->setObject_id($compteurId+1);
+				//$eqLogic->setEqRealId($compteurId+1);
 				$eqLogic->save();
 			}
 		}
@@ -342,7 +342,6 @@ class i2cExt extends eqLogic {
 				$all_off->save();
 			}
 		}
-		
 	}
 
 	public function getChildEq(){
@@ -421,7 +420,7 @@ class i2cExtCmd extends cmd
 		if ( $this->getLogicalId() == 'all_on' )
 		{
 			log::add('i2cExt','debug',"execute - all on");
-			$message = trim(json_encode(array('apikey' => jeedom::getApiKey('i2cExt'), 'cmd' => 'send','board' => $eqLogic->getConfiguration('board'), 'address' => $eqLogic->getConfiguration('address'), 'output' => '100')));
+			$message = trim(json_encode(array('apikey' => jeedom::getApiKey('i2cExt'), 'cmd' => 'send','board' => $eqLogic->getConfiguration('board'), 'address' => parseInt($eqLogic->getConfiguration('address')), 'output' => '100')));
 			$socket = socket_create(AF_INET, SOCK_STREAM, 0);
 			socket_connect($socket, '127.0.0.1', config::byKey('socketport', 'i2cExt'));
 			socket_write($socket, trim($message), strlen(trim($message)));
@@ -431,7 +430,7 @@ class i2cExtCmd extends cmd
 		elseif ( $this->getLogicalId() == 'all_off' )
 		{
 			log::add('i2cExt','debug',"execute - all off");
-			$message = trim(json_encode(array('apikey' => jeedom::getApiKey('i2cExt'), 'cmd' => 'send','board' => $eqLogic->getConfiguration('board'), 'address' => $eqLogic->getConfiguration('address'), 'output' => '0')));
+			$message = trim(json_encode(array('apikey' => jeedom::getApiKey('i2cExt'), 'cmd' => 'send','board' => $eqLogic->getConfiguration('board'), 'address' => parseInt($eqLogic->getConfiguration('address')), 'output' => '0')));
 			$socket = socket_create(AF_INET, SOCK_STREAM, 0);
 			socket_connect($socket, '127.0.0.1', config::byKey('socketport', 'i2cExt'));
 			socket_write($socket, trim($message), strlen(trim($message)));

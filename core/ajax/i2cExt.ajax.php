@@ -30,18 +30,17 @@ try {
             if (!is_object($eqLogic)) {
                 continue;
             }
-        	//if ($MyeqLogic->getConfiguration('address') !=$eqLogic->getConfiguration('address')){
            		switch ($eqLogic->getConfiguration('board')) {
                 	case 'IN8R8':
                     	$search = array_search($eqLogic->getConfiguration('address'), $return['IN8R8_Address'] );
                                     if ($search !== false) {
-                                        //unset($return['IN8R8_Address'][$search]);
+                                        array_splice($return['IN8R8_Address'],$search,1);
                                     }
                      	break;
                 	case 'IN4DIM4':
                     	$search = array_search($eqLogic->getConfiguration('address'), $return['IN4DIM4_Address'] );
                                     if ($search !== false) {
-                                        //unset($return['IN4DIM4_Address'][$search]);
+                                        array_splice($return['IN4DIM4_Address'],$search,1);
                                     }
                      break;
             	}

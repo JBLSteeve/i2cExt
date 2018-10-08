@@ -40,7 +40,7 @@ foreach ($result['devices'] as $key => $device)// decodage de l'entete
 
 	foreach ($eqLogics as $eqLogic) {
 		if (is_object($eqLogic)){
-			if ($eqLogic->getConfiguration('address')==$device['address']){
+			if (parseInt($eqLogic->getConfiguration('address'))==$device['address']){
 			
 				if (isset($result['status'])) {
 					foreach ($result['status'] as $key => $status) {
