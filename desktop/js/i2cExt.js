@@ -173,7 +173,6 @@ function printEqLogic(_eqLogic) {
     }
 
 	var cardAddress = getCardAddress();
-	console.log(cardAddress);
 	switch(_eqLogic.configuration.board) {
    	 case 'IN8R8':
       	   cardAddress['IN8R8_Address'].push(_eqLogic.configuration.address);
@@ -210,6 +209,12 @@ switch($('[data-l1key=configuration][data-l2key=board]').val()){
 
     $('[data-l1key=configuration][data-l2key=address]').html(optionList.join(''));
 }
+
+$('[data-l1key=configuration][data-l2key=board]').on('change', function() {
+//$('[data-l1key=configuration][data-l2key=address]').empty();
+//updateAddressEqLogicList(getCardAddress());
+});
+
 
 $('.eqLogicAction[data-action=hide]').on('click', function () {
     var eqLogic_id = $(this).attr('data-eqLogic_id');
