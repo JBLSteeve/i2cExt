@@ -382,7 +382,7 @@ def cards_hbeat():
 		eqt.manageHbeat(eqt.hbeat)
 
 # ----------------------------------------------------------------------------	
-def main(ioLock, stopEvent):
+def main(ioLock):
 	logging.debug("Start deamon")
 	try:
 		while 1:
@@ -436,7 +436,7 @@ def shutdown():
 # - Threading functions --------------------------------------------------------------------
 def CommunicationCheck(stopEvent, ioLock, period):
 
-	while not StopEvent.isset():
+	while not stopEvent.isset():
 		#Get lock
 		ioLock.acquire()
 		#Get hearbit of all cards
@@ -525,7 +525,7 @@ try:
 
 	_ioLock = Lock()
 	_stop = Event()
-	_ComOKThread = Thread(name="ComOKTask", target=CommunicationCheck, args=(stopEvent, ioLock, _refreshPeriod,))
+	_ComOKThread = Thread(name="ComOKTask", target=CommunicationCheck, args=(_stop, _ioLock, _refreshPeriod,))
 
 	#Start main program
 	main(_ioLock)
