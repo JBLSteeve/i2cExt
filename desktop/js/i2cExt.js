@@ -21,43 +21,11 @@ function addCmdToTable(_cmd) {
         tr += '<span class="subType" subType="' + init(_cmd.subType) + '"></span>';
         tr += '</td>';
         tr += '<td>';
-        if (init(_cmd.logicalId) == 'nbimpulsionminute') {
-			tr += '<textarea class="cmdAttr form-control input-sm" data-l1key="configuration" data-l2key="calcul" style="height : 33px;" placeholder="{{Calcul}}"></textarea> (utiliser #brut# dans la formule)';
-		}
-        if (init(_cmd.logicalId) == 'reel') {
-			tr += '<textarea class="cmdAttr form-control input-sm Formule" data-l1key="configuration" data-l2key="calcul" style="height : 33px;" placeholder="{{Calcul}}"></textarea>';
-			tr += '<a class="btn btn-default cursor listEquipementInfo" data-input="calcul" style="margin-top : 5px;"><i class="fa fa-list-alt "></i> {{Rechercher équipement}}</a>';
-			tr += '<select class="cmdAttr form-control tooltips input-sm choixFormule" style="margin-top : 5px;" title="{{Formule standard}}" data-l1key="configuration" data-l2key="type">';
-			tr += '<option value=""></option>';
-			tr += '<option value="LM35Z">Sonde LM35Z</option>';
-			tr += '<option value="T4012">Sonde T4012</option>';
-			tr += '<option value="Voltage">Voltage</option>';
-			tr += '<option value="SHT-X3L">SHT-X3:Light-LS100</option>';
-			tr += '<option value="SHT-X3T">SHT-X3:Temp-LS100</option>';
-			tr += '<option value="SHT-X3H">SHT-X3:RH-SH100</option>';
-			tr += '<option value="SHT-X3HC">SHT-X3:RH-SH100 compensé</option>';
-			tr += '<option value="TC100">TC 100</option>';
-			tr += '<option value="CT10A">X400 CT10A</option>';
-			tr += '<option value="CT20A">X400 CT20A</option>';
-			tr += '<option value="CT50A">X400 CT50A</option>';
-			tr += '<option value="Ph">X200 pH Probe</option>';
-			tr += '<option value="Autre">Autre</option>';
-			tr += '</select>';
-		}
         tr += '</td>';
         tr += '<td>';
-        if (init(_cmd.logicalId) == 'reel' || init(_cmd.logicalId) == 'nbimpulsionminute') {
-			tr += '<input class="cmdAttr form-control input-sm" data-l1key="unite" style="width : 90px;" placeholder="{{Unite}}">';
-		} else {
-			tr += '<input type=hidden class="cmdAttr form-control input-sm" data-l1key="unite" value="">';
-		}
-        if (init(_cmd.logicalId) == 'reel') {
-			tr += '<input class="tooltips cmdAttr form-control input-sm" data-l1key="configuration" data-l2key="minValue" placeholder="{{Min}}" title="{{Min}}" style="width : 40%;display : inline-block;"><br>';
-			tr += '<input class="tooltips cmdAttr form-control input-sm" data-l1key="configuration" data-l2key="maxValue" placeholder="{{Max}}" title="{{Max}}" style="width : 40%;display : inline-block;"><br>';
-		} else {
-			tr += '<input class="tooltips cmdAttr form-control input-sm" data-l1key="configuration" data-l2key="minValue" placeholder="{{Min}}" title="{{Min}}" style="width : 40%;display : none;"> ';
-			tr += '<input class="tooltips cmdAttr form-control input-sm" data-l1key="configuration" data-l2key="maxValue" placeholder="{{Max}}" title="{{Max}}" style="width : 40%;display : none;">';
-		}
+		tr += '<input type=hidden class="cmdAttr form-control input-sm" data-l1key="unite" value="">';
+		tr += '<input class="tooltips cmdAttr form-control input-sm" data-l1key="configuration" data-l2key="minValue" placeholder="{{Min}}" title="{{Min}}" style="width : 40%;display : none;"> ';
+		tr += '<input class="tooltips cmdAttr form-control input-sm" data-l1key="configuration" data-l2key="maxValue" placeholder="{{Max}}" title="{{Max}}" style="width : 40%;display : none;">';
         tr += '</td>';
         tr += '<td>';
         tr += '<span><input type="checkbox" class="cmdAttr" data-l1key="isHistorized"/> {{Historiser}}<br/></span>';
@@ -65,10 +33,7 @@ function addCmdToTable(_cmd) {
 		if (init(_cmd.subType) == 'binary') {
 			tr += '<span class="expertModeVisible"><input type="checkbox" class="cmdAttr" data-l1key="display" data-l2key="invertBinary" /> {{Inverser}}<br/></span>';
 		}
-        if (init(_cmd.logicalId) == 'reel') {
-			tr += '<span class="expertModeVisible"><input type="checkbox" class="cmdAttr" data-l1key="configuration" data-l2key="minValueReplace" value="1"/> {{Correction Min	 Auto}}<br>';
-			tr += '<input type="checkbox" class="cmdAttr" data-l1key="configuration" data-l2key="maxValueReplace" value="1"/> {{Correction Max Auto}}<br></span>';
-		}        tr += '</td>';
+        tr += '</td>';
         tr += '<td>';
         if (is_numeric(_cmd.id)) {
             tr += '<a class="btn btn-default btn-xs cmdAction expertModeVisible" data-action="configure"><i class="fa fa-cogs"></i></a> ';
@@ -162,7 +127,6 @@ function getCardAddress() {
 }
 
 function printEqLogic(_eqLogic) {
-
 	
      if (!isset(_eqLogic)) {
         var _eqLogic = {configuration: {}};
@@ -211,8 +175,30 @@ switch($('[data-l1key=configuration][data-l2key=board]').val()){
 }
 
 $('[data-l1key=configuration][data-l2key=board]').on('change', function() {
+console.log("in function");
+/*if($('[data-l1key=configuration][data-l2key=board]').val() == "") {
+	$('[data-l1key=configuration][data-l2key=address]').empty();
+	}
+
 //$('[data-l1key=configuration][data-l2key=address]').empty();
-//updateAddressEqLogicList(getCardAddress());
+console.log($('[data-l1key=configuration][data-l2key=address]').val());
+
+	var cardAddress = getCardAddress();
+	switch($('[data-l1key=configuration][data-l2key=board]').val()) {
+   	 case 'IN8R8':
+      	   cardAddress['IN8R8_Address'].push($('[data-l1key=configuration][data-l2key=address]').val());
+      	   console.log("add adress IN8R8");
+      	   console.log($('[data-l1key=configuration][data-l2key=address]').val());
+     	   break;
+   	 case 'IN4DIM4':
+    		cardAddress['IN4DIM4_Address'].push($('[data-l1key=configuration][data-l2key=address]').val());
+     	   break;
+   	 default:
+       	 break;
+	} 
+	
+	updateAddressEqLogicList(getCardAddress());
+*/
 });
 
 

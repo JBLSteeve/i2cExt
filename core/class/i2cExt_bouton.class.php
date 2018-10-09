@@ -46,7 +46,7 @@ class i2cExt_bouton extends eqLogic {
 			$nbimpulsion->setEqLogic_id($this->getId());
 			$nbimpulsion->setType('info');
 			$nbimpulsion->setSubType('numeric');
-			$nbimpulsion->setLogicalId('info');
+			$nbimpulsion->setLogicalId('nbimpulsion');
 			$nbimpulsion->setEventOnly(1);
 			$nbimpulsion->setDisplay('generic_type','GENERIC_INFO');
 			$nbimpulsion->save();
