@@ -76,6 +76,7 @@ class i2cExt extends eqLogic {
 		$cmd .= ' --callback ' . network::getNetworkAccess('internal', 'proto:127.0.0.1:port:comp') . '/plugins/i2cExt/core/php/i2cExt.php';
 		$cmd .= ' --apikey ' . jeedom::getApiKey('i2cExt');
 		$cmd .= ' --cycle ' . config::byKey('cycle', 'i2cExt');
+		$cmd .= ' --refreshPeriod ' . config::byKey('refreshPeriod', 'i2cExt');
 		$cmd .= ' --pid ' . jeedom::getTmpFolder('i2cExt') . '/deamon.pid';
 		log::add('i2cExt', 'info', 'Lancement démon i2cExt : ' . $cmd);
 		exec($cmd . ' >> ' . log::getPathToLog('i2cExt') . ' 2>&1 &');
@@ -137,6 +138,7 @@ class i2cExt extends eqLogic {
 	}
 
 	public function allowDevice() {
+		//OK
 		$value = array('apikey' => jeedom::getApiKey('i2cExt'), 'cmd' => 'add','address' => hexdec($this->getConfiguration('address')),'board' => $this->getConfiguration('board'));
 		$value = json_encode($value);
 		$socket = socket_create(AF_INET, SOCK_STREAM, 0);
@@ -213,7 +215,7 @@ class i2cExt extends eqLogic {
 				$eqLogic = new i2cExt_relai();
 				$eqLogic->setLogicalId($this->getId().'_R'.$compteurId);
 				$eqLogic->setName('Relai ' . ($compteurId+1));
-				//$eqLogic->setEqRealId($compteurId+1);
+				$eqLogic->setObject_id($compteurId+1);
 				$eqLogic->save();
 			}
 		}
@@ -223,7 +225,7 @@ class i2cExt extends eqLogic {
 				$eqLogic = new i2cExt_bouton();
 				$eqLogic->setLogicalId($this->getId().'_B'.$compteurId);
 				$eqLogic->setName('Bouton ' . ($compteurId+1));
-				//$eqLogic->setEqRealId($compteurId+1);
+				$eqLogic->setEqRealId($compteurId+1);
 				$eqLogic->save();
 			}
 		}
@@ -244,7 +246,7 @@ class i2cExt extends eqLogic {
 				$eqLogic = new i2cExt_relai();
 				$eqLogic->setLogicalId($this->getId().'_R'.$compteurId);
 				$eqLogic->setName('Relai ' . ($compteurId+1));
-				//$eqLogic->setEqRealId($compteurId+1);
+				$eqLogic->setObject_id($compteurId+1);
 				$eqLogic->save();
 			}
 		}
@@ -254,7 +256,7 @@ class i2cExt extends eqLogic {
 				$eqLogic = new i2cExt_bouton();
 				$eqLogic->setLogicalId($this->getId().'_B'.$compteurId);
 				$eqLogic->setName('Bouton ' . ($compteurId+1));
-				//$eqLogic->setEqRealId($compteurId+1);
+				$eqLogic->setObject_id($compteurId+1);
 				$eqLogic->save();
 			}
 		}
@@ -341,6 +343,7 @@ class i2cExt extends eqLogic {
 				$all_off->save();
 			}
 		}
+		
 	}
 
 	public function getChildEq(){

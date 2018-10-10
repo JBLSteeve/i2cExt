@@ -83,16 +83,15 @@ class CARDS(object):
 		'''
 		new_hbeat = jeedom_i2c.read(self.address,R_HBEAT)
 		if(new_hbeat != self.hbeat):
+			write_socket("status",self.address,self.board,"","Alive")
 			if(self._status ==0):
-				write_socket("status",self.address,self.board,"","Alive")
 				logging.debug("The card with the @ : " + str(self.address) + " is OK with heartbeat :" + str(new_hbeat))
 			self.ComOK=1  #Communication OK
 			jeedom_i2c.write(self.address,W_HBEAT,hbeat_value)
 		else:
-			if(self._status ==1):
-				write_socket("status",self.address,self.board,"","LossCom")		
+			write_socket("status",self.address,self.board,"","LossCom")
+			if(self._status ==1):	
 				logging.info("The I2C card with the @:" + str(self.address) + " is KO")
-			
 			self.ComOK=0  #Communication KO
 			self.input = self.reply_input
 		self.hbeat = new_hbeat
@@ -377,9 +376,9 @@ def write_socket(type,address,board,channelid,value):	#type=input or output or s
 		logging.error("Send to jeedom error for channel " +str(type) + " id :" + str(channelid) + " on board @:" + str(address))
 				
 # ----------------------------------------------------------------------------	
-def cards_hbeat():
+def cards_hbeat(hbeat):
 	for eqt in Eqts:
-		eqt.manageHbeat(eqt.hbeat)
+		eqt.manageHbeat(hbeat)
 
 # ----------------------------------------------------------------------------	
 def main(ioLock):
@@ -435,12 +434,16 @@ def shutdown():
 
 # - Threading functions --------------------------------------------------------------------
 def CommunicationCheck(stopEvent, ioLock, period):
-
-	while not stopEvent.isset():
+	hbeat=0
+	while not stopEvent.is_set():
 		#Get lock
 		ioLock.acquire()
 		#Get hearbit of all cards
-		cards_hbeat()
+		cards_hbeat(hbeat)
+		#Manage daemon hearbit for all cards
+		hbeat=hbeat+1
+		if (hbeat>256):
+			hbeat=0
 		#release lock
 		ioLock.release()
 

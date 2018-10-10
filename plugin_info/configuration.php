@@ -47,5 +47,11 @@ if (!isConnect('admin')) {
             <input class="configKey form-control" data-l1key="cycle" />
         </div>
     </div>
+    <div class="form-group expertModeVisible">
+        <label class="col-sm-4 control-label">{{Refresh period for communication with boards (s)}}</label>
+        <div class="col-sm-2">
+            <input class="configKey form-control" data-l1key="refreshPeriod" />
+        </div>
+    </div>
 </fieldset>
 </form>

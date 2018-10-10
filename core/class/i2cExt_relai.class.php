@@ -197,17 +197,18 @@ class i2cExt_relaiCmd extends cmd
     /*     * *********************Methode d'instance************************* */
 
     public function execute($_options = null) {
+		log::add('i2cExt','debug','execute');
 		
 		$eqLogic = $this->getEqLogic();
 		if (!is_object($eqLogic) || $eqLogic->getIsEnable() != 1) {
             throw new Exception(__('Equipement desactivé impossible d\éxecuter la commande : ' . $this->getHumanName(), __FILE__));
         }
-		$CardeqLogic = eqLogic::byId(substr ($eqLogic->getLogicalId(), 0, strpos($eqLogic->getLogicalId(),"_")));
+		$IPXeqLogic = eqLogic::byId(substr ($eqLogic->getLogicalId(), 0, strpos($eqLogic->getLogicalId(),"_")));
 		$gceid = substr($eqLogic->getLogicalId(), strpos($eqLogic->getLogicalId(),"_")+2);
 
 		if ( $this->getLogicalId() == 'btn_on' ) {
 			log::add('i2cExt','debug',"execute - channel on");
-			$message = trim(json_encode(array('apikey' => jeedom::getApiKey('i2cExt'), 'cmd' => 'send','board' => $CardeqLogic->getConfiguration('board'), 'address' => hexdec($CardeqLogic->getConfiguration('address')), 'output::{','channel' .$gceid => '100')));
+			$message = trim(json_encode(array('apikey' => jeedom::getApiKey('i2cExt'), 'cmd' => 'send','board' => $IPXeqLogic->getConfiguration('board'), 'address' => hexdec($IPXeqLogic->getConfiguration('address')), 'output::{','channel' .$gceid => '100')));
 			$socket = socket_create(AF_INET, SOCK_STREAM, 0);
 			socket_connect($socket, '127.0.0.1', config::byKey('socketport', 'i2cExt'));
 			socket_write($socket, trim($message), strlen(trim($message)));
@@ -216,7 +217,7 @@ class i2cExt_relaiCmd extends cmd
 		}
 		else if ( $this->getLogicalId() == 'btn_off' ) {
 			log::add('i2cExt','debug',"execute - channel off");
-			$message = trim(json_encode(array('apikey' => jeedom::getApiKey('i2cExt'), 'cmd' => 'send','board' => $CardeqLogic->getConfiguration('board'), 'address' => hexdec($CardeqLogic->getConfiguration('address')), 'output::{','channel' .$gceid => '0')));
+			$message = trim(json_encode(array('apikey' => jeedom::getApiKey('i2cExt'), 'cmd' => 'send','board' => $IPXeqLogic->getConfiguration('board'), 'address' => hexdec($IPXeqLogic->getConfiguration('address')), 'output::{','channel' .$gceid => '0')));
 			$socket = socket_create(AF_INET, SOCK_STREAM, 0);
 			socket_connect($socket, '127.0.0.1', config::byKey('socketport', 'i2cExt'));
 			socket_write($socket, trim($message), strlen(trim($message)));
