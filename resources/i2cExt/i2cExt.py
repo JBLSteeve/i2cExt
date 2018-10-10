@@ -526,7 +526,8 @@ try:
 	_ioLock = Lock()
 	_stop = Event()
 	_ComOKThread = Thread(name="ComOKTask", target=CommunicationCheck, args=(_stop, _ioLock, _refreshPeriod,))
-
+	_ComOKThread.start()
+	
 	#Start main program
 	main(_ioLock)
 except:
