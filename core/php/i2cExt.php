@@ -32,7 +32,7 @@ if (!is_array($result)) {
 }
 $eqLogics = eqLogic::byType('i2cExt');
 
-log::add('i2cExt','debug','device:' . print_r($result, true));
+//log::add('i2cExt','debug','device:' . print_r($result, true));
 
 if (isset($result['devices'])) {
 								
@@ -47,12 +47,12 @@ foreach ($result['devices'] as $key => $device)// decodage de l'entete
 						if (isset($status['status'])) {
 							$cmd = $eqLogic->getCmd(null, 'status');
 							if ($status['status'] == "Alive") {
-								log::add('i2cExt','debug','board:' . $device['board'] . ' address:' . $device['address'] . ' Alive');
+								//log::add('i2cExt','debug','board:' . $device['board'] . ' address:' . $device['address'] . ' Alive');
 								$cmd->event(100);
 								$cmd->setConfiguration('value',100);
 							}
 							else {
-								log::add('i2cExt','debug','board:' . $device['board'] . ' address:' . $device['address'] . ' LossCom');
+								//log::add('i2cExt','debug','board:' . $device['board'] . ' address:' . $device['address'] . ' LossCom');
 								$cmd->event(0);
 								$cmd->setConfiguration('value',0);
 							}
@@ -60,13 +60,13 @@ foreach ($result['devices'] as $key => $device)// decodage de l'entete
 					}
 				}
 					
-				// a faire pour mettre dans jeedom
+				// Récupération de l'état des outputs de la carte
 				if (isset($result['output'])) {
 					foreach ($result['output'] as $key => $output) 
 					for ($compteurId = 0; $compteurId <= 7; $compteurId++) {
 						if (isset($output['channel' . $compteurId])) {
 							log::add('i2cExt','debug','board:' . $device['board'] . ' address:' . $device['address'] . ' channel' . $compteurId . ':' . $output['channel' . $compteurId]);
-							$SubeqLogicOutput = eqLogic::byLogicalId($eqLogic->getId()."_R".$compteurId, 'i2cExt_relai');
+							$SubeqLogicOutput = eqLogic::byLogicalId($eqLogic->getId()."_O".$compteurId, 'i2cExt_output');
 								if ( is_object($SubeqLogicOutput) ) {
 									if ($eqLogic->getObject_id()!='') {
 										$statuscmd = $SubeqLogicOutput->getCmd(null, 'state');
@@ -75,18 +75,23 @@ foreach ($result['devices'] as $key => $device)// decodage de l'entete
 										$statuscmd->event($output['channel' . $compteurId]);
 										$statuscmd->setConfiguration('value',$output['channel' . $compteurId]);
 										
+										#$statuscmdd = $SubeqLogicOutput->getCmd(null, 'target');
+										#$statuscmd->setCollectDate('');
+										#$statuscmdd->setCollectDate(date('Y-m-d H:i:s'));
+										#$statuscmdd->event($output['channel' . $compteurId]);
+										#$statuscmdd->setConfiguration('value',$output['channel' . $compteurId]);
 									}
 								}
 							}
 						}
 					}
-				// a faire pour mettre dans jeedom
+				// récupération de l'état des entrée de la carte
 				if (isset($result['input'])) {
 					foreach ($result['input'] as $key => $input) 
 					for ($compteurId = 0; $compteurId <= 7; $compteurId++) {
 						if (isset($input['channel' . $compteurId])) {
 						//log::add('i2cExt','debug','board:' . $device['board'] . ' address:' . $device['address'] . ' channel' . $compteurId . ':' . $input['channel' . $compteurId]);
-						$SubeqLogicInput = eqLogic::byLogicalId($eqLogic->getId()."_B".$compteurId, 'i2cExt_bouton');
+						$SubeqLogicInput = eqLogic::byLogicalId($eqLogic->getId()."_I".$compteurId, 'i2cExt_input');
 								if ( is_object($SubeqLogicInput) ) {
 									if ($eqLogic->getObject_id()!='') {
 										$statuscmd = $SubeqLogicInput->getCmd(null, 'state');

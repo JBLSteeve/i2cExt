@@ -99,6 +99,7 @@ function addCmdToTable(_cmd) {
 /////////////////////////////////////////////////////////////////////////////
 // Ajout pour les adresses des cartes
 /////////////////////////////////////////////////////////////////////////////
+
 function getCardAddress() {
     var eqLogic = new Object();
     $.ajax({
@@ -127,6 +128,7 @@ function getCardAddress() {
 }
 
 function printEqLogic(_eqLogic) {
+	console.log('fonction printEqLogic');
 	
      if (!isset(_eqLogic)) {
         var _eqLogic = {configuration: {}};
@@ -137,7 +139,7 @@ function printEqLogic(_eqLogic) {
     }
 
 	var cardAddress = getCardAddress();
-	switch(_eqLogic.configuration.board) {
+	/*switch(_eqLogic.configuration.board) {
    	 case 'IN8R8':
       	   cardAddress['IN8R8_Address'].push(_eqLogic.configuration.address);
      	   break;
@@ -146,9 +148,8 @@ function printEqLogic(_eqLogic) {
      	   break;
    	 default:
        	 break;
-	} 
-updateAddressEqLogicList(cardAddress);
-	
+	} */
+	updateAddressEqLogicList(cardAddress);
 
     $('body').setValues(_eqLogic, '.eqLogicAttr'); 
 
@@ -175,7 +176,11 @@ switch($('[data-l1key=configuration][data-l2key=board]').val()){
 }
 
 $('[data-l1key=configuration][data-l2key=board]').on('change', function() {
-console.log("in function");
+console.log("fonction mise à jour liste board");
+//console.log($('[data-l1key=configuration][data-l2key=address]').val());
+
+//$('[data-l1key=configuration][data-l2key=address]').empty();
+//updateAddressEqLogicList(getCardAddress());
 /*if($('[data-l1key=configuration][data-l2key=board]').val() == "") {
 	$('[data-l1key=configuration][data-l2key=address]').empty();
 	}
@@ -196,9 +201,9 @@ console.log($('[data-l1key=configuration][data-l2key=address]').val());
    	 default:
        	 break;
 	} 
-	
+*/	
 	updateAddressEqLogicList(getCardAddress());
-*/
+
 });
 
 
@@ -212,6 +217,6 @@ $('.eqLogicAction[data-action=hide]').on('click', function () {
     return false;
 });
 
-$("#table_cmd_i2cExt_relai").sortable({axis: "y", cursor: "move", items: ".cmd", placeholder: "ui-state-highlight", tolerance: "intersect", forcePlaceholderSize: true});
-$("#table_cmd_i2cExt_bouton").sortable({axis: "y", cursor: "move", items: ".cmd", placeholder: "ui-state-highlight", tolerance: "intersect", forcePlaceholderSize: true});
+$("#table_cmd_i2cExt_output").sortable({axis: "y", cursor: "move", items: ".cmd", placeholder: "ui-state-highlight", tolerance: "intersect", forcePlaceholderSize: true});
+$("#table_cmd_i2cExt_input").sortable({axis: "y", cursor: "move", items: ".cmd", placeholder: "ui-state-highlight", tolerance: "intersect", forcePlaceholderSize: true});
 $("#table_cmd").sortable({axis: "y", cursor: "move", items: ".cmd", placeholder: "ui-state-highlight", tolerance: "intersect", forcePlaceholderSize: true});

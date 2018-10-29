@@ -54,20 +54,23 @@ except ImportError:
 # ----------------------------------------------------------------------------
 class CARDS(object):
 	__metaclass__ = ABCMeta	
-	#Register = namedtuple('Register', ['W_OUTPUT', 'R_OUTPUT', 'R_INPUT', 'W_HBEAT', 'R_HBEAT', 'R_VERSION'])				
 
 	def __init__(self, _cardAddress,_board):
 		if (not isinstance(_cardAddress, int)):
 			raise TypeError("Should be an integer")	
-		#logging.debug("Create the class for the device with @:" + str(_cardAddress))
+		
+		# Cards Registers
+		self.W_HBEAT=96 #0x60
+		self.R_HBEAT=97 #0x61
+		self.R_VERSION=144 #0x90
+		# Cards datas
 		self.board=_board
 		self.address=_cardAddress
 		self.hbeat=0
 		self._status=0
 		self._status=self.manageHbeat(0)	
 		self.version=self.aboutVersion()
-		#self.Register = namedtuple("Register",["W_OUTPUT", "R_OUTPUT", "R_INPUT", "W_HBEAT", "R_HBEAT", "R_VERSION"])
-		#self._register = self.Register(W_OUTPUT=66, R_OUTPUT=65, R_INPUT=80, W_HBEAT=96, R_HBEAT=97, R_VERSION=144)
+		#logging.debug("Create the class CARDS for the device with @:" + str(_cardAddress))
 		
 	def manageHbeat(self, hbeat_value):
 		'''Check communication with cards
@@ -81,13 +84,13 @@ class CARDS(object):
 		- 0 : No communication
 		- 1 : Online
 		'''
-		new_hbeat = jeedom_i2c.read(self.address,R_HBEAT)
+		new_hbeat = jeedom_i2c.read(self.address,self.R_HBEAT)
 		if(new_hbeat != self.hbeat):
 			write_socket("status",self.address,self.board,"","Alive")
 			if(self._status ==0):
 				logging.debug("The card with the @ : " + str(self.address) + " is OK with heartbeat :" + str(new_hbeat))
 			self.ComOK=1  #Communication OK
-			jeedom_i2c.write(self.address,W_HBEAT,hbeat_value)
+			jeedom_i2c.write(self.address,self.W_HBEAT,hbeat_value)
 		else:
 			write_socket("status",self.address,self.board,"","LossCom")
 			if(self._status ==1):	
@@ -102,7 +105,7 @@ class CARDS(object):
 		When called, request card hardware version through i2c connection and return it.
 		'''
 		if(self.ComOK==1):
-			self.version = self.readCommand(R_VERSION)
+			self.version = self.readCommand(self.R_VERSION)
 			logging.info("The I2C card with the @:" + str(self.address) + " is in the version :" + str(self.version))
 			return self.version
 		
@@ -167,17 +170,27 @@ class IN8R8(CARDS):
 	def __init__(self, _cardAddress,_board,_reply_input):
 		if ((_cardAddress > 82) & (_cardAddress < 100)):
 			super(IN8R8,self).__init__(_cardAddress,_board) #appel du constructeur de la classe parent (a verifier)
+			# IN8R8 Registers
+			self.W_OUTPUT=66 #0x42
+			self.R_OUTPUT=65 #0x41
+			self.R_INPUT=80 #0x50
+			
+			# IN8R8 datas
 			self.outputchannel=8
 			self.input=[False,False,False,False,False,False,False,False]
 			self.inputOn=[False,False,False,False,False,False,False,False]
+			self.maintained_delay=[4,4,4,4,4,4,4,4]
+			self.timer_maintained=[0,0,0,0,0,0,0,0]
 			self.reply_input=_reply_input
 			self.output=0
 			self.routput=[False,False,False,False,False,False,False,False]
 			self.routputChanged=[False,False,False,False,False,False,False,False]
 			self.outputChanged=0
 			self.inputChanged=0
-			self.maintained_delay=[4,4,4,4,4,4,4,4]
-			self.timer_maintained=[0,0,0,0,0,0,0,0]
+			
+
+
+			
 
 		else :
 			raise ValueError("The address " + str(_cardAddress) + " is not an IN8R8 card")	
@@ -215,7 +228,7 @@ class IN8R8(CARDS):
 
 	# Read input of the board
 	def readCardInput(self):
-		input=splitbyte(jeedom_i2c.read(self.address,R_INPUT))
+		input=splitbyte(jeedom_i2c.read(self.address,self.R_INPUT))
 		for x in range(len(input)):
 			if (input[x] != self.input[x]):	#Verifier que ce sont des tableau (longueur ...)
 				if ((input[x] != False) & (self.inputOn[x] ==False)) :	# Cas haut -> bas, relachement avant ON
@@ -237,10 +250,11 @@ class IN8R8(CARDS):
 			else :
 				self.inputOn[x] = False
 				self.timer_maintained[x]=0
+		globals.JEEDOM_COM.send_changes_async()
 				
 	# Read output feedback of the board
 	def readCardOutput(self):
-		routput=splitbyte(jeedom_i2c.read(self.address,R_OUTPUT))
+		routput=splitbyte(jeedom_i2c.read(self.address,self.R_OUTPUT))
 		#logging.debug("Read output :" + str(routput) + " for the IN8R8 board @:" + str(self.address))
 		if  ((self.routput != routput)):
 			for x in range(len(routput)):
@@ -253,12 +267,14 @@ class IN8R8(CARDS):
 						
 					self.routput[x] = routput[x]
 					self.routputChanged[x]=True
+			globals.JEEDOM_COM.send_changes_async()
 	
 	# Send the status to the board
 	def write(self):
-		jeedom_i2c.write(self.address,W_OUTPUT,self.output)
-		self.outputChanged = 0
-		logging.debug("Send output :" + jeedom_utils.dec2bin(self.output,8) + " for the IN8R8 board @:" + str(self.address))
+		if self.outputChanged != 0:
+			jeedom_i2c.write(self.address,self.W_OUTPUT,self.output)
+			self.outputChanged = 0
+			logging.debug("Send output :" + jeedom_utils.dec2bin(self.output,8) + " for the IN8R8 board @:" + str(self.address))
 	
 	def writeCommand(self,_command,_value):
 		jeedom_i2c.write(self.address,_command,_value)
@@ -266,13 +282,123 @@ class IN8R8(CARDS):
 # ------------------------------------------------------------------------------		
 class IN4DIM4(CARDS):
 	def __init__(self, _cardAddress,_board,_reply_input):
-		super(IN4DIM4,self).__init__(_cardAddress,_board)  #appel du constructeur de la classe parent (a verifier)
-		self.outputchannel=4
-		self.input=[0, 0, 0, 0]
-		self.output=[0, 0, 0, 0]
-		self.reply_input=_reply_input
-		#self.setpoint=[0, 0, 0, 0]
-		#self.fade=[0, 0, 0, 0]
+		if ((_cardAddress > 39) & (_cardAddress < 57)):
+			super(IN4DIM4,self).__init__(_cardAddress,_board)  #appel du constructeur de la classe parent (a verifier)
+			# IN4DIM4 Registers
+			self.W_OUTPUT=[7,23,39,55] #0x07,0x17,0x27,0x37,0x47
+			self.W_FADE=[8,24,40,56]  #0x08,0x18,0x28,0x38,0x48
+			self.R_OUTPUT=[10,26,42,58] #0x0A,0x1A,0x2A,0x3A	
+			self.R_INPUT=80 #0x50
+			
+			# IN4DIM4 datas
+			self.outputchannel=4
+			self.input=[False,False,False,False]
+			self.inputOn=[False,False,False,False]
+			self.reply_input=_reply_input
+			self.maintained_delay=[4,4,4,4]
+			self.timer_maintained=[0,0,0,0]
+		
+			self.output=[0, 0, 0, 0]
+			self.fade=[0, 0, 0, 0]
+			self.routput=[0, 0, 0, 0]
+			self.routputChanged=[False,False,False,False]
+			self.outputChanged=[False,False,False,False]
+			self.fadeChanged=[False,False,False,False]
+			self.inputChanged=0
+			
+			#self.setpoint=[0, 0, 0, 0]
+			#self.fade=[0, 0, 0, 0]
+			
+
+		
+		else :
+			raise ValueError("The address " + str(_cardAddress) + " is not an IN4DIM4 card")	
+# output methodes
+	# status of the output setpoint
+	def getSetpoint(self, _channel) :
+		return self.output[_channel]
+
+			
+	# set the output setpoint
+	def newSP(self, _channel, _SP):
+		self.outputChanged[_channel]=True
+		self.output[_channel] = _SP
+
+	# set the output setpoint
+	def newFA(self, _channel, _FA):
+		self.fadeChanged[_channel]=True
+		self.fade[_channel] = _FA
+				
+# input methodes
+	def inputIsSet(self, _id) :
+		if jeedom_utils.testBit(self.input,_id)==0:
+			return 0
+		else :
+			return 1
+			
+# output feedback methodes		
+		# status of the output feedback
+	def outputIsSet(self, _id) :
+		if jeedom_utils.testBit(self.routput,_id)==0:
+			return 0
+		else :
+			return 1	
+
+	# Read input of the board
+	def readCardInput(self):
+		input=splitbyte(jeedom_i2c.read(self.address,self.R_INPUT))
+		for x in range(len(self.input)):
+			if (input[x] != self.input[x]):	#Verifier que ce sont des tableau (longueur ...)
+				if ((input[x] != False) & (self.inputOn[x] ==False)) :	# Cas haut -> bas, relachement avant ON
+					logging.debug("Read pulse on input:" + str(x) + " for the IN4DIM4 board @:" + str(self.address))
+					write_socket("input",self.address,self.board,x,"Pulse")
+				elif ((input[x] != True) & (self.inputOn[x] ==True)) :	# Cas haut -> bas , relachement apres ON
+					logging.debug("Read OFF on input:" + str(x) + " for the IN4DIM4 board @:" + str(self.address))
+					write_socket("input",self.address,self.board,x,"Off")
+								
+				self.input[x] = input[x]
+			
+			if (self.input[x] == True):
+				if (self.inputOn[x] == False):
+					self.timer_maintained[x]+=1
+					if (self.timer_maintained[x]>self.maintained_delay[x]):
+						self.inputOn[x] = True
+						logging.debug("Read ON on input:" + str(x) + " for the IN4DIM4 board @:" + str(self.address))
+						write_socket("input",self.address,self.board,x,"On")
+			else :
+				self.inputOn[x] = False
+				self.timer_maintained[x]=0
+		globals.JEEDOM_COM.send_changes_async()
+				
+	# Read output feedback of the board
+	def readCardOutput(self):
+		routput=[0,0,0,0]
+		for x in range(len(self.routput)):
+			routput[x]=jeedom_i2c.read(self.address,self.R_OUTPUT[x])
+			#logging.debug("Read output " + str(x) + " at value:" + str(routput[x]) + " for the IN4DIM4 board @:" + str(self.address))
+			if (routput[x] != self.routput[x]):
+				logging.debug("Read new output feedback on channel:" + str(x) + " at " + str(routput[x]) + " for the IN4DIM4 board @:" + str(self.address))
+				write_socket("output",self.address,self.board,x,routput[x])
+				self.routput[x] = routput[x]
+				self.routputChanged[x]=True
+		globals.JEEDOM_COM.send_changes_async()
+	
+	# Send the status to the board
+	def write(self):
+		for x in range(len(self.output)):
+			if self.outputChanged[x] != False:
+				jeedom_i2c.write(self.address,self.W_OUTPUT[x],self.output[x])
+				self.outputChanged[x] = False
+				logging.debug("Send output " + str(x) + " at value:" + str(self.output[x]) + " for the IN4DIM4 board @:" + str(self.address))
+			if self.fadeChanged[x] != False:
+				jeedom_i2c.write(self.address,self.W_FADE[x],self.fade[x])
+				self.fadeChanged[x] = False
+				logging.debug("Send output " + str(x) + " new fade:" + str(self.fade[x]) + " for the IN4DIM4 board @:" + str(self.address))
+	
+	def writeCommand(self,_command,_value):
+		jeedom_i2c.write(self.address,_command,_value)
+		logging.debug("Send command :" + str(_command) + " value :" + str(_value) + " for the board @:" + str(self.address))
+		
 # ----------------------------------------------------------------------------
 def splitbyte(_byte):
 	return [b == '1' for b in bin(_byte)[2:].rjust(8)[::-1]] 
@@ -283,7 +409,6 @@ def findCardAdress(_address):
 	else:
 		for eqt in Eqts:
 			if eqt.address == _address :
-				logging.info("find card")	 
 				return eqt
 		else:
 			return None
@@ -295,6 +420,7 @@ def read_socket():
 		global JEEDOM_SOCKET_MESSAGE
 		if not JEEDOM_SOCKET_MESSAGE.empty():
 			message = json.loads(jeedom_utils.stripped(JEEDOM_SOCKET_MESSAGE.get()))
+			logging.debug("message : " + str(message))
 			address = int(message['address'])
 			board=str(message['board'])
 			
@@ -308,7 +434,10 @@ def read_socket():
 			if card == None:
 				if message['cmd'] == 'add':
 					#logging.debug("Add the device with @:" + str(address)) 
-					Eqts.append(IN8R8(address,board,[False,False,False,False,False,False,False,False]))
+					if message['board'] == 'IN8R8':
+						Eqts.append(IN8R8(address,board,[False,False,False,False,False,False,False,False]))
+					if message['board'] == 'IN4DIM4':
+						Eqts.append(IN4DIM4(address,board,[0,0,0,0]))
 			
 			else:
 				if message['cmd'] == 'receive':
@@ -323,21 +452,30 @@ def read_socket():
 
 				elif message['cmd'] == 'send':
 					if 'channel' in str(message):
-						for i in range(card.outputchannel):
-							if ('channel' + str(i)) in str(message):
-								card.newSP(i, int(message['channel' + str(i)]))
-					else:
-						if ((message['output']=='100') | (message['output']=='On') | (message['output']=='ON')):
-							for i in range(card.outputchannel):
-								card.newSP(i, 100)
-						else:
-							for i in range(card.outputchannel):
-								card.newSP(i, 0)
+						if 'value' in str(message):
+							if ((message['output']['channel']=='ALL') | (message['output']['channel']=='All' )):
+								if ((message['output']=='100') | (message['output']=='On') | (message['output']=='ON')):
+									for i in range(card.outputchannel):
+										card.newSP(i, 100)
+								else:
+									for i in range(card.outputchannel):
+										card.newSP(i, 0)
+							else:
+								if ((message['output']['value']=='On') | (message['output']['value']=='ON')):
+									card.newSP(int(message['output']['channel']), 100)
+								elif ((message['output']['value']=='Off') | (message['output']['value']=='OFF')):
+									card.newSP(int(message['output']['channel']), 0)
+								else:
+									card.newSP(int(message['output']['channel']), int(message['output']['value']))
+						if 'fade' in str(message):
+							card.newFA(int(message['output']['channel']), int(message['output']['fade']))
+
+
 								
 	except TypeError as te:
 		logging.error('Error on read socket : '+ str(te) + str(message))
 	except KeyError as ke:
-		logging.error("Invalid apikey from socket : " + str(ke) + str(message))
+		logging.error("Invalid apikey from socket : " + str(ke) + " message :" + str(message))
 	#Catch all other exception and print exception name raised
 	except:
 		logging.error('Error on read socket : '+ str(sys.exc_info()[0]))	
@@ -353,8 +491,7 @@ def read_i2cbus():
 def write_i2cbus():
 	for eqt in Eqts:		# Loop for each boards
 		if eqt.ComOK == 1:
-			if eqt.outputChanged != 0:
-				eqt.write()				# Write to board the output
+			eqt.write()				# Write to board the output
 
 # ----------------------------------------------------------------------------
 def write_socket(type,address,board,channelid,value):	#type=input or output or status
@@ -372,6 +509,7 @@ def write_socket(type,address,board,channelid,value):	#type=input or output or s
 	try:
 		globals.JEEDOM_COM.add_changes('devices::'+message['address'],message)
 		globals.JEEDOM_COM.add_changes(str(type) + '::',status)
+		
 	except Exception:
 		logging.error("Send to jeedom error for channel " +str(type) + " id :" + str(channelid) + " on board @:" + str(address))
 				
@@ -379,6 +517,7 @@ def write_socket(type,address,board,channelid,value):	#type=input or output or s
 def cards_hbeat(hbeat):
 	for eqt in Eqts:
 		eqt.manageHbeat(hbeat)
+		globals.JEEDOM_COM.send_changes_async()
 
 # ----------------------------------------------------------------------------	
 def main(ioLock):
@@ -458,10 +597,10 @@ _device = '1'
 _pidfile = '/tmp/i2cExt.pid'
 _apikey = ''
 _callback = ''
-_refreshPeriod = 1.0
+_refreshPeriod = 5.0
 _cycle = 0.3
 parser = argparse.ArgumentParser(description='i2cExt Daemon for Jeedom plugin')
-parser.add_argument("--device", help="Device", type=str)
+parser.add_argument("--device", help="Device", type=int)
 parser.add_argument("--socketport", help="Socketport for server", type=str)
 parser.add_argument("--loglevel", help="Log Level for the daemon", type=str)
 parser.add_argument("--callback", help="Callback", type=str)
@@ -501,7 +640,7 @@ logging.info('Callback : '+str(_callback))
 logging.info('Cycle : '+str(_cycle))
 logging.info('Refresh period : '+str(_refreshPeriod))
 
-_device=1
+
 if _device is None:
 	logging.error('No i2c device found')
 	shutdown()	
@@ -520,9 +659,11 @@ try:
 	jeedom_socket = jeedom_socket(port=_socket_port,address=_socket_host)
 
 	logging.debug("Start ...")
+	# Start Ethernet socket
+	jeedom_socket.open()
 	# Start I2C
 	jeedom_i2c.open()
-	jeedom_socket.open()
+	
 
 	logging.debug("Start communication check thread")
 

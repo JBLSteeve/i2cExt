@@ -28,9 +28,12 @@ if (!isConnect('admin')) {
             <label class="col-sm-4 control-label">{{Port i2cExt}}</label>
             <div class="col-sm-4">
                 <select class="configKey form-control" data-l1key="port">
-                    <option value="none">{{Aucun}}</option>
-                    <option value="1">{{0}}</option>
-                    <option value="1">{{1}}</option>
+                	<option value="none">{{Aucun}}</option>
+                	<?php
+                	foreach (ls('/dev/', 'i2c*') as $value) {
+						echo '<option value="' . substr($value, -1) . '">/dev/' . $value . '</option>';
+					}
+					?>
                </select>
            </div>
        </div>
@@ -48,7 +51,7 @@ if (!isConnect('admin')) {
         </div>
     </div>
     <div class="form-group expertModeVisible">
-        <label class="col-sm-4 control-label">{{Refresh period for communication with boards (s)}}</label>
+        <label class="col-sm-4 control-label">{{Temps de cycle pour la gestion de la communication aves les cartes (s)}}</label>
         <div class="col-sm-2">
             <input class="configKey form-control" data-l1key="refreshPeriod" />
         </div>

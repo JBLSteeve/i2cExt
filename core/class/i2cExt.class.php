@@ -19,8 +19,8 @@
 /* * ***************************Includes********************************* */
 require_once dirname(__FILE__) . '/../../../../core/php/core.inc.php';
 
-include_file('core', 'i2cExt_relai', 'class', 'i2cExt');
-include_file('core', 'i2cExt_bouton', 'class', 'i2cExt');
+include_file('core', 'i2cExt_output', 'class', 'i2cExt');
+include_file('core', 'i2cExt_input', 'class', 'i2cExt');
 
 
 class i2cExt extends eqLogic {
@@ -42,17 +42,6 @@ class i2cExt extends eqLogic {
 			}
 		}
 		$return['launchable'] = 'ok';
-		/*Todo $port = config::byKey('port', 'i2cExt');
-		if ($port != 'auto') {
-			$port = jeedom::getUsbMapping($port);
-			if (is_string($port)) {
-				if (@!file_exists($port)) {
-					$return['launchable'] = 'nok';
-					$return['launchable_message'] = __('Le port n\'est pas configuré', __FILE__);
-				}
-				exec(system::getCmdSudo() . 'chmod 777 ' . $port . ' > /dev/null 2>&1');
-			}
-		}*/
 		return $return;
 	}
 
@@ -62,15 +51,10 @@ class i2cExt extends eqLogic {
 		if ($deamon_info['launchable'] != 'ok') {
 			throw new Exception(__('Veuillez vérifier la configuration', __FILE__));
 		}
-		$port ='auto';
-		/* Todo detection port I2C
-		$port = config::byKey('port', 'i2cExt');
-		if ($port != 'auto') {
-			$port = jeedom::getUsbMapping($port);
-		}*/
 		$i2cExt_path = realpath(dirname(__FILE__) . '/../../resources/i2cExt');
-		$cmd = '/usr/bin/python ' . $i2cExt_path . '/i2cExt.py';
-		$cmd .= ' --device ' . $port;
+		// ajout 'nice -n 19 ' pour limiter la conso CPU
+		$cmd = 'nice -n 19 /usr/bin/python ' . $i2cExt_path . '/i2cExt.py';
+		$cmd .= ' --device ' . config::byKey('port', 'i2cExt');
 		$cmd .= ' --loglevel ' . log::convertLogLevel(log::getLogLevel('i2cExt'));
 		$cmd .= ' --socketport ' . config::byKey('socketport', 'i2cExt');
 		$cmd .= ' --callback ' . network::getNetworkAccess('internal', 'proto:127.0.0.1:port:comp') . '/plugins/i2cExt/core/php/i2cExt.php';
@@ -109,10 +93,6 @@ class i2cExt extends eqLogic {
 		}
 		system::kill('i2cExt.py');
 		system::fuserk(config::byKey('socketport', 'i2cExt'));
-		$port = config::byKey('port', 'i2cExt');
-		/*if ($port != 'auto') {
-			system::fuserk(jeedom::getUsbMapping($port));
-		}*/
 		sleep(1);
 	}
 
@@ -150,7 +130,6 @@ class i2cExt extends eqLogic {
 	public static function pull() {
 	//Appele toute les secondes scan ou verification status
 	}
-
 	
 	public function preInsert(){
 		$this->setIsVisible(0);
@@ -158,20 +137,7 @@ class i2cExt extends eqLogic {
 
 	public function postInsert(){
 		log::add('i2cExt','debug',"function post");
-		$i2cExtcmd = $this->getCmd(null, 'updatetime');
-		if ( ! is_object($i2cExtcmd)) {
-			$i2cExtcmd = new i2cExtcmd();
-			$i2cExtcmd->setName('Dernier refresh');
-			$i2cExtcmd->setEqLogic_id($this->getId());
-			$i2cExtcmd->setLogicalId('updatetime');
-			$i2cExtcmd->setUnite('');
-			$i2cExtcmd->setType('info');
-			$i2cExtcmd->setSubType('string');
-			$i2cExtcmd->setIsHistorized(0);
-			$i2cExtcmd->setEventOnly(1);
-			$i2cExtcmd->setDisplay('generic_type','GENERIC_INFO');
-			$i2cExtcmd->save();		
-		}
+
 		$cmd = $this->getCmd(null, 'status');
 		if ( ! is_object($cmd) ) {
 			$cmd = new i2cExtCmd();
@@ -209,25 +175,62 @@ class i2cExt extends eqLogic {
 			$all_off->setDisplay('generic_type','GENERIC_ACTION');
 			$all_off->save();
 		}
-		for ($compteurId = 0; $compteurId <= 7; $compteurId++) {
-			if ( ! is_object(self::byLogicalId($this->getId()."_R".$compteurId, 'i2cExt_relai')) ) {
-				log::add('i2cExt','debug','Creation relai : '.$this->getId().'_R'.$compteurId);
-				$eqLogic = new i2cExt_relai();
-				$eqLogic->setLogicalId($this->getId().'_R'.$compteurId);
-				$eqLogic->setName('Relai ' . ($compteurId+1));
-				$eqLogic->setObject_id($compteurId+1);
-				$eqLogic->save();
+		/*
+		foreach (self::byType('i2cExt_output') as $eqLogic) {
+			if ( substr($eqLogic->getLogicalId(), 0, strpos($eqLogic->getLogicalId(),"_")) == $this->getId() ) {
+				log::add('i2cExt','debug','Suppression output : '.$eqLogic->getName());
+				$eqLogic->remove();
 			}
 		}
-		for ($compteurId = 0; $compteurId <= 7; $compteurId++) {
-			if ( ! is_object(self::byLogicalId($this->getId()."_B".$compteurId, 'i2cExt_bouton')) ) {
-				log::add('i2cExt','debug','Creation bouton : '.$this->getId().'_B'.$compteurId);
-				$eqLogic = new i2cExt_bouton();
-				$eqLogic->setLogicalId($this->getId().'_B'.$compteurId);
-				$eqLogic->setName('Bouton ' . ($compteurId+1));
-				$eqLogic->setEqRealId($compteurId+1);
-				$eqLogic->save();
+		foreach (self::byType('i2cExt_input') as $eqLogic) {
+			if ( substr($eqLogic->getLogicalId(), 0, strpos($eqLogic->getLogicalId(),"_")) == $this->getId() ) {
+				log::add('i2cExt','debug','Suppression input : '.$eqLogic->getName());
+				$eqLogic->remove();
 			}
+		}
+		*/
+		if ($this->getConfiguration('board')=="IN8R8") {
+			for ($compteurId = 0; $compteurId <= 7; $compteurId++) {
+				if ( ! is_object(self::byLogicalId($this->getId()."_O".$compteurId, 'i2cExt_output')) ) {
+					log::add('i2cExt','debug','Creation output for IN8R8  : '.$this->getId().'_O'.$compteurId);
+					$eqLogic = new i2cExt_output();
+					$eqLogic->setLogicalId($this->getId().'_O'.$compteurId);
+					$eqLogic->setName($this->getName() . ' - Sortie ' . ($compteurId+1));
+					$eqLogic->setConfiguration('board',$this->getConfiguration('board'));
+					$eqLogic->save();
+				}
+			}
+			for ($compteurId = 0; $compteurId <= 7; $compteurId++) {
+				if ( ! is_object(self::byLogicalId($this->getId()."_I".$compteurId, 'i2cExt_input')) ) {
+					log::add('i2cExt','debug','Creation input for IN8R8 : '.$this->getId().'_I'.$compteurId);
+					$eqLogic = new i2cExt_input();
+					$eqLogic->setLogicalId($this->getId().'_I'.$compteurId);
+					$eqLogic->setName($this->getName() . ' - Entrée ' . ($compteurId+1));
+					$eqLogic->setConfiguration('board',$this->getConfiguration('board'));
+					$eqLogic->save();
+				}
+			}
+		} else if ($this->getConfiguration('board')=="IN4DIM4") {
+			for ($compteurId = 0; $compteurId <= 3; $compteurId++) {
+				if ( ! is_object(self::byLogicalId($this->getId()."_O".$compteurId, 'i2cExt_dim')) ) {
+					log::add('i2cExt','debug','Creation dim for IN4DIM4 : '.$this->getId().'_O'.$compteurId);
+					$eqLogic = new i2cExt_dim();
+					$eqLogic->setLogicalId($this->getId().'_O'.$compteurId);
+					$eqLogic->setName($this->getName() . ' - Sortie ' . ($compteurId+1));
+					$eqLogic->setConfiguration('board',$this->getConfiguration('board'));
+					$eqLogic->save();
+				}
+			}
+			for ($compteurId = 0; $compteurId <= 3; $compteurId++) {
+				if ( ! is_object(self::byLogicalId($this->getId()."_I".$compteurId, 'i2cExt_input')) ) {
+					log::add('i2cExt','debug','Creation input for IN4DIM4: '.$this->getId().'_I'.$compteurId);
+					$eqLogic = new i2cExt_input();
+					$eqLogic->setLogicalId($this->getId().'_I'.$compteurId);
+					$eqLogic->setName($this->getName() . ' - Entrée ' . ($compteurId+1));
+					$eqLogic->setConfiguration('board',$this->getConfiguration('board'));
+					$eqLogic->save();
+				}
+			} 
 		}
 	}
 		
@@ -240,25 +243,60 @@ class i2cExt extends eqLogic {
 	}
 
 	public function postUpdate(){
-		for ($compteurId = 0; $compteurId <= 7; $compteurId++) {
-			if ( ! is_object(self::byLogicalId($this->getId()."_R".$compteurId, 'i2cExt_relai')) ) {
-				log::add('i2cExt','debug','Creation relai : '.$this->getId().'_R'.$compteurId);
-				$eqLogic = new i2cExt_relai();
-				$eqLogic->setLogicalId($this->getId().'_R'.$compteurId);
-				$eqLogic->setName('Relai ' . ($compteurId+1));
-				$eqLogic->setObject_id($compteurId+1);
-				$eqLogic->save();
+		foreach (self::byType('i2cExt_output') as $eqLogic) {
+			if ( substr($eqLogic->getLogicalId(), 0, strpos($eqLogic->getLogicalId(),"_")) == $this->getId() ) {
+				log::add('i2cExt','debug','Suppression output : '.$eqLogic->getName());
+				$eqLogic->remove();
 			}
 		}
-		for ($compteurId = 0; $compteurId <= 7; $compteurId++) {
-			if ( ! is_object(self::byLogicalId($this->getId()."_B".$compteurId, 'i2cExt_bouton')) ) {
-				log::add('i2cExt','debug','Creation bouton : '.$this->getId().'_B'.$compteurId);
-				$eqLogic = new i2cExt_bouton();
-				$eqLogic->setLogicalId($this->getId().'_B'.$compteurId);
-				$eqLogic->setName('Bouton ' . ($compteurId+1));
-				$eqLogic->setObject_id($compteurId+1);
-				$eqLogic->save();
+		foreach (self::byType('i2cExt_input') as $eqLogic) {
+			if ( substr($eqLogic->getLogicalId(), 0, strpos($eqLogic->getLogicalId(),"_")) == $this->getId() ) {
+				log::add('i2cExt','debug','Suppression input : '.$eqLogic->getName());
+				$eqLogic->remove();
 			}
+		}
+		if ($this->getConfiguration('board')=="IN8R8") {
+			for ($compteurId = 0; $compteurId <= 7; $compteurId++) {
+				if ( ! is_object(self::byLogicalId($this->getId()."_O".$compteurId, 'i2cExt_output')) ) {
+					log::add('i2cExt','debug','Creation output for IN8R8  : '.$this->getId().'_O'.$compteurId);
+					$eqLogic = new i2cExt_output();
+					$eqLogic->setLogicalId($this->getId().'_O'.$compteurId);
+					$eqLogic->setName($this->getName() . ' - Sortie ' . ($compteurId+1));
+					$eqLogic->setConfiguration('board',$this->getConfiguration('board'));
+					$eqLogic->save();
+				}
+			}
+			for ($compteurId = 0; $compteurId <= 7; $compteurId++) {
+				if ( ! is_object(self::byLogicalId($this->getId()."_I".$compteurId, 'i2cExt_input')) ) {
+					log::add('i2cExt','debug','Creation input for IN8R8 : '.$this->getId().'_I'.$compteurId);
+					$eqLogic = new i2cExt_input();
+					$eqLogic->setLogicalId($this->getId().'_I'.$compteurId);
+					$eqLogic->setName($this->getName() . ' - Entrée ' . ($compteurId+1));
+					$eqLogic->setConfiguration('board',$this->getConfiguration('board'));
+					$eqLogic->save();
+				}
+			}
+		} else if ($this->getConfiguration('board')=="IN4DIM4") {
+			for ($compteurId = 0; $compteurId <= 3; $compteurId++) {
+				if ( ! is_object(self::byLogicalId($this->getId()."_O".$compteurId, 'i2cExt_dim')) ) {
+					log::add('i2cExt','debug','Creation dim for IN4DIM4 : '.$this->getId().'_O'.$compteurId);
+					$eqLogic = new i2cExt_output();
+					$eqLogic->setLogicalId($this->getId().'_O'.$compteurId);
+					$eqLogic->setName($this->getName() . ' - Sortie ' . ($compteurId+1));
+					$eqLogic->setConfiguration('board',$this->getConfiguration('board'));
+					$eqLogic->save();
+				}
+			}
+			for ($compteurId = 0; $compteurId <= 3; $compteurId++) {
+				if ( ! is_object(self::byLogicalId($this->getId()."_I".$compteurId, 'i2cExt_input')) ) {
+					log::add('i2cExt','debug','Creation input for IN4DIM4: '.$this->getId().'_I'.$compteurId);
+					$eqLogic = new i2cExt_input();
+					$eqLogic->setLogicalId($this->getId().'_I'.$compteurId);
+					$eqLogic->setName($this->getName() . ' - Entrée ' . ($compteurId+1));
+					$eqLogic->setConfiguration('board',$this->getConfiguration('board'));
+					$eqLogic->save();
+				}
+			} 
 		}
 		$cmd = $this->getCmd(null, 'status');
 		if ( ! is_object($cmd) ) {
@@ -279,27 +317,6 @@ class i2cExt extends eqLogic {
 			{
 				$cmd->setDisplay('generic_type','GENERIC_INFO');
 				$cmd->save();
-			}
-		}
-		$i2cExtcmd = $this->getCmd(null, 'updatetime');
-		if ( ! is_object($i2cExtcmd)) {
-			$i2cExtcmd = new i2cExtcmd();
-			$i2cExtcmd->setName('Dernier refresh');
-			$i2cExtcmd->setEqLogic_id($this->getId());
-			$i2cExtcmd->setLogicalId('updatetime');
-			$i2cExtcmd->setUnite('');
-			$i2cExtcmd->setType('info');
-			$i2cExtcmd->setSubType('string');
-			$i2cExtcmd->setIsHistorized(0);
-			$i2cExtcmd->setEventOnly(1);
-			$i2cExtcmd->save();		
-		}
-		else
-		{
-			if ( $i2cExtcmd->getDisplay('generic_type') == "" )
-			{
-				$i2cExtcmd->setDisplay('generic_type','GENERIC_INFO');
-				$i2cExtcmd->save();
 			}
 		}
 		$all_on = $this->getCmd(null, 'all_on');
@@ -344,16 +361,19 @@ class i2cExt extends eqLogic {
 			}
 		}
 		
+
+		$this->allowDevice();
 	}
+
 
 	public function getChildEq(){
 		$ChildList = array();
-		foreach (self::byType('i2cExt_relai') as $eqLogic) {
+		foreach (self::byType('i2cExt_output') as $eqLogic) {
 			if ( substr($eqLogic->getLogicalId(), 0, strpos($eqLogic->getLogicalId(),"_")) == $this->getId() ) {
 				array_push($ChildList, $eqLogic->getId());
 			}
 		}
-		foreach (self::byType('i2cExt_bouton') as $eqLogic) {
+		foreach (self::byType('i2cExt_input') as $eqLogic) {
 			if ( substr($eqLogic->getLogicalId(), 0, strpos($eqLogic->getLogicalId(),"_")) == $this->getId() ) {
 				array_push($ChildList, $eqLogic->getId());
 			}
@@ -362,25 +382,19 @@ class i2cExt extends eqLogic {
 	}
 
 	public function preRemove(){
-		foreach (self::byType('i2cExt_relai') as $eqLogic) {
+		foreach (self::byType('i2cExt_output') as $eqLogic) {
 			if ( substr($eqLogic->getLogicalId(), 0, strpos($eqLogic->getLogicalId(),"_")) == $this->getId() ) {
-				log::add('i2cExt','debug','Suppression relai : '.$eqLogic->getName());
+				log::add('i2cExt','debug','Suppression output : '.$eqLogic->getName());
 				$eqLogic->remove();
 			}
 		}
-		foreach (self::byType('i2cExt_bouton') as $eqLogic) {
+		foreach (self::byType('i2cExt_input') as $eqLogic) {
 			if ( substr($eqLogic->getLogicalId(), 0, strpos($eqLogic->getLogicalId(),"_")) == $this->getId() ) {
-				log::add('i2cExt','debug','Suppression bouton : '.$eqLogic->getName());
+				log::add('i2cExt','debug','Suppression input : '.$eqLogic->getName());
 				$eqLogic->remove();
 			}
 		}
 	$this->disallowDevice();	// Suppression dans le module python
-	}
-
-	public function configPush() {
-		log::add('i2cExt','debug',"function config push");
-
-		
 	}
 
 	public function event() {
@@ -389,15 +403,9 @@ class i2cExt extends eqLogic {
 	}
 		
 	public function getImage() {
-			// A faire
 			return 'plugin/i2cExt/core/config/device/' . $this->getConfiguration('board') . '.jpg';
 	}
     
-	public function scan() {
-		if ( $this->getIsEnable() ) {
-			log::add('i2cExt','debug','scan '.$this->getName());
-		}
-	}
     /*     * **********************Getteur Setteur*************************** */
 }
 
@@ -422,7 +430,7 @@ class i2cExtCmd extends cmd
 		if ( $this->getLogicalId() == 'all_on' )
 		{
 			log::add('i2cExt','debug',"execute - all on");
-			$message = trim(json_encode(array('apikey' => jeedom::getApiKey('i2cExt'), 'cmd' => 'send','board' => $eqLogic->getConfiguration('board'), 'address' => hexdec($eqLogic->getConfiguration('address')), 'output' => '100')));
+			$message = trim(json_encode(array('apikey' => jeedom::getApiKey('i2cExt'), 'cmd' => 'send','board' => $eqLogic->getConfiguration('board'), 'address' => hexdec($eqLogic->getConfiguration('address')), 'output' => array('channel' => 'ALL' ,'value' => 'ON'))));
 			$socket = socket_create(AF_INET, SOCK_STREAM, 0);
 			socket_connect($socket, '127.0.0.1', config::byKey('socketport', 'i2cExt'));
 			socket_write($socket, trim($message), strlen(trim($message)));
@@ -432,7 +440,7 @@ class i2cExtCmd extends cmd
 		elseif ( $this->getLogicalId() == 'all_off' )
 		{
 			log::add('i2cExt','debug',"execute - all off");
-			$message = trim(json_encode(array('apikey' => jeedom::getApiKey('i2cExt'), 'cmd' => 'send','board' => $eqLogic->getConfiguration('board'), 'address' => hexdec($eqLogic->getConfiguration('address')), 'output' => '0')));
+			$message = trim(json_encode(array('apikey' => jeedom::getApiKey('i2cExt'), 'cmd' => 'send','board' => $eqLogic->getConfiguration('board'), 'address' => hexdec($eqLogic->getConfiguration('address')), 'output' => array('channel' => 'ALL' ,'value' => 'OFF'))));
 			$socket = socket_create(AF_INET, SOCK_STREAM, 0);
 			socket_connect($socket, '127.0.0.1', config::byKey('socketport', 'i2cExt'));
 			socket_write($socket, trim($message), strlen(trim($message)));
