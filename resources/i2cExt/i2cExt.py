@@ -34,14 +34,6 @@ from collections import namedtuple
 from abc import ABCMeta, abstractmethod
 from threading import Thread, Event, Lock
 
-# Card Registers
-W_OUTPUT=66 #0x42
-R_OUTPUT=65 #0x41
-R_INPUT=80 #0x50
-W_HBEAT=96 #0x60
-R_HBEAT=97 #0x61
-R_VERSION=144 #0x90
-
 # Equipements
 Eqts=[]
 
@@ -188,10 +180,6 @@ class IN8R8(CARDS):
 			self.outputChanged=0
 			self.inputChanged=0
 			
-
-
-			
-
 		else :
 			raise ValueError("The address " + str(_cardAddress) + " is not an IN8R8 card")	
 			
@@ -250,7 +238,6 @@ class IN8R8(CARDS):
 			else :
 				self.inputOn[x] = False
 				self.timer_maintained[x]=0
-		globals.JEEDOM_COM.send_changes_async()
 				
 	# Read output feedback of the board
 	def readCardOutput(self):
@@ -267,7 +254,6 @@ class IN8R8(CARDS):
 						
 					self.routput[x] = routput[x]
 					self.routputChanged[x]=True
-			globals.JEEDOM_COM.send_changes_async()
 	
 	# Send the status to the board
 	def write(self):
@@ -287,6 +273,7 @@ class IN4DIM4(CARDS):
 			# IN4DIM4 Registers
 			self.W_OUTPUT=[7,23,39,55] #0x07,0x17,0x27,0x37,0x47
 			self.W_FADE=[8,24,40,56]  #0x08,0x18,0x28,0x38,0x48
+			self.W_STOP=[4,20,36,52]  #0x08,0x18,0x28,0x38,0x48
 			self.R_OUTPUT=[10,26,42,58] #0x0A,0x1A,0x2A,0x3A	
 			self.R_INPUT=80 #0x50
 			
@@ -328,7 +315,13 @@ class IN4DIM4(CARDS):
 	def newFA(self, _channel, _FA):
 		self.fadeChanged[_channel]=True
 		self.fade[_channel] = _FA
-				
+
+	# set the output setpoint
+	def StopCommand(self, _channel):
+		logging.debug("Stop command:" + str(_channel) + " for the IN4DIM4 board @:" + str(self.address))
+		jeedom_i2c.write(self.address,self.W_STOP[_channel],0)
+
+								
 # input methodes
 	def inputIsSet(self, _id) :
 		if jeedom_utils.testBit(self.input,_id)==0:
@@ -368,9 +361,8 @@ class IN4DIM4(CARDS):
 			else :
 				self.inputOn[x] = False
 				self.timer_maintained[x]=0
-		globals.JEEDOM_COM.send_changes_async()
 				
-	# Read output feedback of the board
+	# Read output feedback of the board 
 	def readCardOutput(self):
 		routput=[0,0,0,0]
 		for x in range(len(self.routput)):
@@ -381,7 +373,6 @@ class IN4DIM4(CARDS):
 				write_socket("output",self.address,self.board,x,routput[x])
 				self.routput[x] = routput[x]
 				self.routputChanged[x]=True
-		globals.JEEDOM_COM.send_changes_async()
 	
 	# Send the status to the board
 	def write(self):
@@ -469,8 +460,8 @@ def read_socket():
 									card.newSP(int(message['output']['channel']), int(message['output']['value']))
 						if 'fade' in str(message):
 							card.newFA(int(message['output']['channel']), int(message['output']['fade']))
-
-
+						if 'stop' in str(message):
+							card.StopCommand(int(message['stop']['channel']))
 								
 	except TypeError as te:
 		logging.error('Error on read socket : '+ str(te) + str(message))
@@ -509,6 +500,7 @@ def write_socket(type,address,board,channelid,value):	#type=input or output or s
 	try:
 		globals.JEEDOM_COM.add_changes('devices::'+message['address'],message)
 		globals.JEEDOM_COM.add_changes(str(type) + '::',status)
+
 		
 	except Exception:
 		logging.error("Send to jeedom error for channel " +str(type) + " id :" + str(channelid) + " on board @:" + str(address))
@@ -517,7 +509,6 @@ def write_socket(type,address,board,channelid,value):	#type=input or output or s
 def cards_hbeat(hbeat):
 	for eqt in Eqts:
 		eqt.manageHbeat(hbeat)
-		globals.JEEDOM_COM.send_changes_async()
 
 # ----------------------------------------------------------------------------	
 def main(ioLock):
@@ -598,14 +589,12 @@ _pidfile = '/tmp/i2cExt.pid'
 _apikey = ''
 _callback = ''
 _refreshPeriod = 5.0
-_cycle = 0.3
 parser = argparse.ArgumentParser(description='i2cExt Daemon for Jeedom plugin')
 parser.add_argument("--device", help="Device", type=int)
 parser.add_argument("--socketport", help="Socketport for server", type=str)
 parser.add_argument("--loglevel", help="Log Level for the daemon", type=str)
 parser.add_argument("--callback", help="Callback", type=str)
 parser.add_argument("--apikey", help="Apikey", type=str)
-parser.add_argument("--cycle", help="Cycle to send event", type=str)
 parser.add_argument("--pid", help="Pid file", type=str)
 parser.add_argument("--refreshPeriod", help="Heartbit pooling period (in seconds, default : 1s)", type=float)
 args = parser.parse_args()
@@ -622,8 +611,6 @@ if args.apikey:
 	_apikey = args.apikey
 if args.pid:
 	_pidfile = args.pid
-if args.cycle:
-	_cycle = float(args.cycle)
 if args.refreshPeriod:
 	_refreshPeriod = args.refreshPeriod
 	
@@ -637,7 +624,6 @@ logging.info('PID file : '+str(_pidfile))
 logging.info('Device : '+str(_device))
 logging.info('Apikey : '+str(_apikey))
 logging.info('Callback : '+str(_callback))
-logging.info('Cycle : '+str(_cycle))
 logging.info('Refresh period : '+str(_refreshPeriod))
 
 
@@ -650,7 +636,7 @@ signal.signal(signal.SIGTERM, handler)
 
 try:
 	jeedom_utils.write_pid(str(_pidfile))
-	globals.JEEDOM_COM = jeedom_com(apikey = _apikey,url = _callback,cycle=_cycle)
+	globals.JEEDOM_COM = jeedom_com(apikey = _apikey,url = _callback,cycle=0.01)
 	print('api ',_apikey)
 	if not globals.JEEDOM_COM.test():
 		logging.error('Network communication issues. Please fixe your Jeedom network configuration.')

@@ -59,7 +59,6 @@ class i2cExt extends eqLogic {
 		$cmd .= ' --socketport ' . config::byKey('socketport', 'i2cExt');
 		$cmd .= ' --callback ' . network::getNetworkAccess('internal', 'proto:127.0.0.1:port:comp') . '/plugins/i2cExt/core/php/i2cExt.php';
 		$cmd .= ' --apikey ' . jeedom::getApiKey('i2cExt');
-		$cmd .= ' --cycle ' . config::byKey('cycle', 'i2cExt');
 		$cmd .= ' --refreshPeriod ' . config::byKey('refreshPeriod', 'i2cExt');
 		$cmd .= ' --pid ' . jeedom::getTmpFolder('i2cExt') . '/deamon.pid';
 		log::add('i2cExt', 'info', 'Lancement démon i2cExt : ' . $cmd);

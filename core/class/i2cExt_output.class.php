@@ -132,7 +132,7 @@ class i2cExt_output extends eqLogic {
 			$btn_dec->setEventOnly(1);
 			$btn_dec->setDisplay('generic_type','LIGHT_OFF');
 			$btn_dec->save();
-		}
+		}*/
 		$btn_stop = $this->getCmd(null, 'btn_stop');
         if ( ! is_object($btn_stop) ) {
             $btn_stop = new i2cExt_outputCmd();
@@ -144,7 +144,7 @@ class i2cExt_output extends eqLogic {
 			$btn_stop->setEventOnly(1);
 			$btn_stop->setDisplay('generic_type','LIGHT_OFF');
 			$btn_stop->save();
-		}*/
+		}
 		}
 	}
 
@@ -341,7 +341,7 @@ class i2cExt_output extends eqLogic {
 				$btn_dec_old->setDisplay('generic_type','LIGHT_OFF');
 				$btn_dec_old->save();
 			}			
-		}
+		}*/
 		$btn_stop_old = $this->getCmd(null, 'btn_stop');
         if ( ! is_object($btn_stop_old) && get_class($btn_stop_old) != "i2cExt_outputCmd" ) {
             $btn_stop = new i2cExt_outputCmd();
@@ -363,7 +363,7 @@ class i2cExt_output extends eqLogic {
 				$btn_stop_old->setDisplay('generic_type','LIGHT_OFF');
 				$btn_stop_old->save();
 			}			
-		}*/	
+		}
 		
 		}
 	}
@@ -448,6 +448,15 @@ class i2cExt_outputCmd extends cmd
 		else if ( $this->getLogicalId() == 'fade' ) {
 			log::add('i2cExt','debug',"execute - channel fade=" . $_options['slider']);
 			$message = trim(json_encode(array('apikey' => jeedom::getApiKey('i2cExt'), 'cmd' => 'send','board' => $CARDeqLogic->getConfiguration('board'), 'address' => hexdec($CARDeqLogic->getConfiguration('address')), 'output' => array('channel' => $gceid, 'fade' => $_options['slider']))));
+			$socket = socket_create(AF_INET, SOCK_STREAM, 0);
+			socket_connect($socket, '127.0.0.1', config::byKey('socketport', 'i2cExt'));
+			socket_write($socket, trim($message), strlen(trim($message)));
+			socket_close($socket);
+
+		}
+		else if ( $this->getLogicalId() == 'btn_stop' ) {
+			log::add('i2cExt','debug',"execute - channel stop");
+			$message = trim(json_encode(array('apikey' => jeedom::getApiKey('i2cExt'), 'cmd' => 'send','board' => $CARDeqLogic->getConfiguration('board'), 'address' => hexdec($CARDeqLogic->getConfiguration('address')), 'stop' => array('channel' => $gceid))));
 			$socket = socket_create(AF_INET, SOCK_STREAM, 0);
 			socket_connect($socket, '127.0.0.1', config::byKey('socketport', 'i2cExt'));
 			socket_write($socket, trim($message), strlen(trim($message)));
