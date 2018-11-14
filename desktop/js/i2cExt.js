@@ -164,6 +164,12 @@ switch($('[data-l1key=configuration][data-l2key=board]').val()){
          	optionList.push('>', _listEqLogicByType.IN8R8_Address[i], '</option>');
     	}
 	break;
+	case 'IN8P4':
+    	for (var i = 0; i < _listEqLogicByType.IN8P4_Address.length; i++) {
+        	optionList.push('<option value="', _listEqLogicByType.IN8P4_Address[i], '"');
+         	optionList.push('>', _listEqLogicByType.IN8P4_Address[i], '</option>');
+    	}
+	break;
 	case 'IN4DIM4':
   		for (var i = 0; i < _listEqLogicByType.IN4DIM4_Address.length; i++) {
         	optionList.push('<option value="', _listEqLogicByType.IN4DIM4_Address[i], '"');

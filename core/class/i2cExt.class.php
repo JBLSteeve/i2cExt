@@ -153,7 +153,11 @@ class i2cExt extends eqLogic {
         $all_on = $this->getCmd(null, 'all_on');
         if ( ! is_object($all_on) ) {
             $all_on = new i2cExtCmd();
-			$all_on->setName('All On');
+            if ($this->getConfiguration('board')=="IN8P4"){
+				$all_on->setName('All Economique');
+			}else {
+				$all_on->setName('All On');
+			}
 			$all_on->setEqLogic_id($this->getId());
 			$all_on->setType('action');
 			$all_on->setSubType('other');
@@ -165,7 +169,11 @@ class i2cExt extends eqLogic {
         $all_off = $this->getCmd(null, 'all_off');
         if ( ! is_object($all_off) ) {
             $all_off = new i2cExtCmd();
-			$all_off->setName('All Off');
+            if ($this->getConfiguration('board')=="IN8P4"){
+				$all_off->setName('All Confort');
+			}else {
+				$all_off->setName('All Off');
+			}
 			$all_off->setEqLogic_id($this->getId());
 			$all_off->setType('action');
 			$all_off->setSubType('other');
@@ -209,7 +217,28 @@ class i2cExt extends eqLogic {
 					$eqLogic->save();
 				}
 			}
-		} else if ($this->getConfiguration('board')=="IN4DIM4") {
+		} else if ($this->getConfiguration('board')=="IN8P4") {
+			for ($compteurId = 0; $compteurId <= 3; $compteurId++) {
+				if ( ! is_object(self::byLogicalId($this->getId()."_O".$compteurId, 'i2cExt_output')) ) {
+					log::add('i2cExt','debug','Creation output for IN8P4  : '.$this->getId().'_O'.$compteurId);
+					$eqLogic = new i2cExt_output();
+					$eqLogic->setLogicalId($this->getId().'_O'.$compteurId);
+					$eqLogic->setName($this->getName() . ' - Sortie ' . ($compteurId+1));
+					$eqLogic->setConfiguration('board',$this->getConfiguration('board'));
+					$eqLogic->save();
+				}
+			}
+			for ($compteurId = 0; $compteurId <= 8; $compteurId++) {
+				if ( ! is_object(self::byLogicalId($this->getId()."_I".$compteurId, 'i2cExt_input')) ) {
+					log::add('i2cExt','debug','Creation input for IN8P4 : '.$this->getId().'_I'.$compteurId);
+					$eqLogic = new i2cExt_input();
+					$eqLogic->setLogicalId($this->getId().'_I'.$compteurId);
+					$eqLogic->setName($this->getName() . ' - Entrée ' . ($compteurId+1));
+					$eqLogic->setConfiguration('board',$this->getConfiguration('board'));
+					$eqLogic->save();
+				}
+			}
+		}else if ($this->getConfiguration('board')=="IN4DIM4") {
 			for ($compteurId = 0; $compteurId <= 3; $compteurId++) {
 				if ( ! is_object(self::byLogicalId($this->getId()."_O".$compteurId, 'i2cExt_dim')) ) {
 					log::add('i2cExt','debug','Creation dim for IN4DIM4 : '.$this->getId().'_O'.$compteurId);
@@ -275,7 +304,28 @@ class i2cExt extends eqLogic {
 					$eqLogic->save();
 				}
 			}
-		} else if ($this->getConfiguration('board')=="IN4DIM4") {
+		} else 	if ($this->getConfiguration('board')=="IN8P4") {
+			for ($compteurId = 0; $compteurId <= 3; $compteurId++) {
+				if ( ! is_object(self::byLogicalId($this->getId()."_O".$compteurId, 'i2cExt_output')) ) {
+					log::add('i2cExt','debug','Creation output for IN8P4  : '.$this->getId().'_O'.$compteurId);
+					$eqLogic = new i2cExt_output();
+					$eqLogic->setLogicalId($this->getId().'_O'.$compteurId);
+					$eqLogic->setName($this->getName() . ' - Sortie ' . ($compteurId+1));
+					$eqLogic->setConfiguration('board',$this->getConfiguration('board'));
+					$eqLogic->save();
+				}
+			}
+			for ($compteurId = 0; $compteurId <= 8; $compteurId++) {
+				if ( ! is_object(self::byLogicalId($this->getId()."_I".$compteurId, 'i2cExt_input')) ) {
+					log::add('i2cExt','debug','Creation input for IN8P4 : '.$this->getId().'_I'.$compteurId);
+					$eqLogic = new i2cExt_input();
+					$eqLogic->setLogicalId($this->getId().'_I'.$compteurId);
+					$eqLogic->setName($this->getName() . ' - Entrée ' . ($compteurId+1));
+					$eqLogic->setConfiguration('board',$this->getConfiguration('board'));
+					$eqLogic->save();
+				}
+			}
+		}else if ($this->getConfiguration('board')=="IN4DIM4") {
 			for ($compteurId = 0; $compteurId <= 3; $compteurId++) {
 				if ( ! is_object(self::byLogicalId($this->getId()."_O".$compteurId, 'i2cExt_dim')) ) {
 					log::add('i2cExt','debug','Creation dim for IN4DIM4 : '.$this->getId().'_O'.$compteurId);
@@ -321,7 +371,11 @@ class i2cExt extends eqLogic {
 		$all_on = $this->getCmd(null, 'all_on');
 		if ( ! is_object($all_on)) {
             $all_on = new i2cExtCmd();
-			$all_on->setName('All On');
+            if ($this->getConfiguration('board')=="IN8P4"){
+				$all_on->setName('All Economique');
+			}else {
+				$all_on->setName('All On');
+			}
 			$all_on->setEqLogic_id($this->getId());
 			$all_on->setType('action');
 			$all_on->setSubType('other');
@@ -337,12 +391,21 @@ class i2cExt extends eqLogic {
 				$all_on->setDisplay('generic_type','GENERIC_ACTION');
 				$all_on->save();
 			}
+			 if ($this->getConfiguration('board')=="IN8P4"){
+				$all_on->setName('All Economique');
+			}else {
+				$all_on->setName('All On');
+			}
 		}
 
 		$all_off = $this->getCmd(null, 'all_off');
 		if ( ! is_object($all_off)) {
             $all_off = new i2cExtCmd();
-			$all_off->setName('All Off');
+			if ($this->getConfiguration('board')=="IN8P4"){
+				$all_off->setName('All Confort');
+			}else {
+				$all_off->setName('All Off');
+			}
 			$all_off->setEqLogic_id($this->getId());
 			$all_off->setType('action');
 			$all_off->setSubType('other');
@@ -357,6 +420,11 @@ class i2cExt extends eqLogic {
 			{
 				$all_off->setDisplay('generic_type','GENERIC_ACTION');
 				$all_off->save();
+			}
+			if ($this->getConfiguration('board')=="IN8P4"){
+				$all_off->setName('All Confort');
+			}else {
+				$all_off->setName('All Off');
 			}
 		}
 		

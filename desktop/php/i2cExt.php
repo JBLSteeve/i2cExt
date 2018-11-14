@@ -145,6 +145,7 @@ $eqLogics = eqLogic::byType('i2cExt');
                           onchange="if(this.selectedIndex == 0) document.getElementById('i2cExt_address').style.display = 'none';
 					 	 	else document.getElementById('i2cExt_address').style.display = 'block';">
                             <option value="" >Aucune</option>
+                            <option value="IN8P4" >IN8P4</option>
                             <option value="IN8R8" >IN8R8</option>
 							<option value="IN4DIM4" >IN4DIM4</option>
                         </select>

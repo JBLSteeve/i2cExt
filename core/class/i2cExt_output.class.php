@@ -37,17 +37,77 @@ class i2cExt_output extends eqLogic {
 				$state->setSubType('binary');
 			}elseif ($this->getConfiguration('board')=="IN4DIM4"){
 				$state->setSubType('numeric');
+			}elseif ($this->getConfiguration('board')=="IN8P4"){
+				$state->setSubType('numeric');
 			}else {
 				$state->setSubType('binary');
 			}
 			
 			$state->setLogicalId('state');
 			$state->setEventOnly(1);
-			$state->setDisplay('generic_type','LIGHT_STATE');
-			$state->setTemplate('dashboard', 'light');
-			$state->setTemplate('mobile', 'light');      
+			if ($this->getConfiguration('board')=="IN8P4"){
+				$state->setDisplay('generic_type','');
+				$state->setTemplate('dashboard', 'heatPiloteWire');
+				$state->setTemplate('mobile', 'heatPiloteWire');  
+			}
+			else{
+				$state->setDisplay('generic_type','LIGHT_STATE');
+				$state->setTemplate('dashboard', 'light');
+				$state->setTemplate('mobile', 'light');  
+			}    
 			$state->save();
 		}
+		if ($this->getConfiguration('board')=="IN8P4"){
+        $btn_conf = $this->getCmd(null, 'btn_conf');
+        if ( ! is_object($btn_conf) ) {
+            $btn_conf = new i2cExt_outputCmd();
+			$btn_conf->setName('Confort');
+			$btn_conf->setEqLogic_id($this->getId());
+			$btn_conf->setType('action');
+			$btn_conf->setSubType('other');
+			$btn_conf->setLogicalId('btn_conf');
+			$btn_conf->setEventOnly(1);
+			$btn_conf->setDisplay('generic_type','confort');
+			$btn_conf->save();
+		}
+        $btn_off = $this->getCmd(null, 'btn_off');
+        if ( ! is_object($btn_off) ) {
+            $btn_off = new i2cExt_outputCmd();
+			$btn_off->setName('Off');
+			$btn_off->setEqLogic_id($this->getId());
+			$btn_off->setType('action');
+			$btn_off->setSubType('other');
+			$btn_off->setLogicalId('btn_off');
+			$btn_off->setEventOnly(1);
+			$btn_off->setDisplay('generic_type','LIGHT_OFF');
+			$btn_off->save();
+		}
+		$btn_hg = $this->getCmd(null, 'btn_hg');
+        if ( ! is_object($btn_hg) ) {
+            $btn_hg = new i2cExt_outputCmd();
+			$btn_hg->setName('Hors gel');
+			$btn_hg->setEqLogic_id($this->getId());
+			$btn_hg->setType('action');
+			$btn_hg->setSubType('other');
+			$btn_hg->setLogicalId('btn_hg');
+			$btn_hg->setEventOnly(1);
+			$btn_hg->setDisplay('generic_type','');
+			$btn_hg->save();
+		}
+		$btn_eco = $this->getCmd(null, 'btn_eco');
+        if ( ! is_object($btn_eco) ) {
+            $btn_eco = new i2cExt_outputCmd();
+			$btn_eco->setName('Economique');
+			$btn_eco->setEqLogic_id($this->getId());
+			$btn_eco->setType('action');
+			$btn_eco->setSubType('other');
+			$btn_eco->setLogicalId('btn_eco');
+			$btn_eco->setEventOnly(1);
+			$btn_eco->setDisplay('generic_type','');
+			$btn_eco->save();
+		}
+		}
+		if (($this->getConfiguration('board')=="IN8R8") OR ($this->getConfiguration('board')=="IN4DIM4")){
         $btn_on = $this->getCmd(null, 'btn_on');
         if ( ! is_object($btn_on) ) {
             $btn_on = new i2cExt_outputCmd();
@@ -72,7 +132,7 @@ class i2cExt_output extends eqLogic {
 			$btn_off->setDisplay('generic_type','LIGHT_OFF');
 			$btn_off->save();
 		}
-
+		}
 		if ($this->getConfiguration('board')=="IN4DIM4"){
 		$fade = $this->getCmd(null, 'fade');
         if ( ! is_object($fade) ) {
@@ -171,9 +231,16 @@ class i2cExt_output extends eqLogic {
 			$state->setEventOnly(1);
 			$state->setIsHistorized($state_old->getIsHistorized());
 			$state->setIsVisible($state_old->getIsVisible());
-			$state->setDisplay('generic_type','LIGHT_STATE');
-			$state->setTemplate('dashboard', 'light');
-			$state->setTemplate('mobile', 'light');      
+			if ($this->getConfiguration('board')=="IN8P4"){
+				$state->setDisplay('generic_type','');
+				$state->setTemplate('dashboard', 'heatPiloteWire');
+				$state->setTemplate('mobile', 'heatPiloteWire');  
+			}
+			else{
+				$state->setDisplay('generic_type','LIGHT_STATE');
+				$state->setTemplate('dashboard', 'light');
+				$state->setTemplate('mobile', 'light');  
+			}    
 			$state->save();
 			$state_old->remove();
 		}
@@ -195,6 +262,98 @@ class i2cExt_output extends eqLogic {
 				$state_old->save();
 			}			
 		}
+		if ($this->getConfiguration('board')=="IN8P4"){
+        $btn_conf_old = $this->getCmd(null, 'btn_conf');
+        if ( is_object($btn_conf_old) && get_class($btn_conf_old) != "i2cExt_outputCmd" ) {
+            $btn_conf = new i2cExt_outputCmd();
+			$btn_conf->setName($btn_on_old->getName());
+			$btn_conf->setEqLogic_id($this->getId());
+			$btn_conf->setType('action');
+			$btn_conf->setSubType('other');
+			$btn_conf->setLogicalId('btn_conf');
+			$btn_conf->setEventOnly(1);
+			$btn_conf->setIsHistorized($btn_on_old->getIsHistorized());
+			$btn_conf->setIsVisible($btn_on_old->getIsVisible());
+			$btn_conf->setDisplay('generic_type','confort');
+			$btn_conf->save();
+			$btn_conf_old->remove();
+		} elseif ( is_object($btn_conf_old) )
+		{
+			if ( $btn_conf_old->getDisplay('generic_type') == "" )
+			{
+				$btn_conf_old->setDisplay('generic_type','');
+				$btn_conf_old->save();
+			}			
+		}
+		$btn_off_old = $this->getCmd(null, 'btn_off');
+        if ( is_object($btn_off_old) && get_class($btn_off_old) != "i2cExt_outputCmd" ) {
+            $btn_off = new i2cExt_outputCmd();
+			$btn_off->setName($btn_on_old->getName());
+			$btn_off->setEqLogic_id($this->getId());
+			$btn_off->setType('action');
+			$btn_off->setSubType('other');
+			$btn_off->setLogicalId('btn_off');
+			$btn_off->setEventOnly(1);
+			$btn_off->setIsHistorized($btn_on_old->getIsHistorized());
+			$btn_off->setIsVisible($btn_on_old->getIsVisible());
+			$btn_off->setDisplay('generic_type','offort');
+			$btn_off->save();
+			$btn_off_old->remove();
+		} elseif ( is_object($btn_off_old) )
+		{
+			if ( $btn_off_old->getDisplay('generic_type') == "" )
+			{
+				$btn_off_old->setDisplay('generic_type','');
+				$btn_off_old->save();
+			}			
+		}
+		$btn_hg_old = $this->getCmd(null, 'btn_hg');
+        if ( is_object($btn_hg_old) && get_class($btn_hg_old) != "i2cExt_outputCmd" ) {
+            $btn_hg = new i2cExt_outputCmd();
+			$btn_hg->setName($btn_on_old->getName());
+			$btn_hg->setEqLogic_id($this->getId());
+			$btn_hg->setType('action');
+			$btn_hg->setSubType('other');
+			$btn_hg->setLogicalId('btn_hg');
+			$btn_hg->setEventOnly(1);
+			$btn_hg->setIsHistorized($btn_on_old->getIsHistorized());
+			$btn_hg->setIsVisible($btn_on_old->getIsVisible());
+			$btn_hg->setDisplay('generic_type','hgort');
+			$btn_hg->save();
+			$btn_hg_old->remove();
+		} elseif ( is_object($btn_hg_old) )
+		{
+			if ( $btn_hg_old->getDisplay('generic_type') == "" )
+			{
+				$btn_hg_old->setDisplay('generic_type','');
+				$btn_hg_old->save();
+			}			
+		}
+		$btn_eco_old = $this->getCmd(null, 'btn_eco');
+        if ( is_object($btn_eco_old) && get_class($btn_eco_old) != "i2cExt_outputCmd" ) {
+            $btn_eco = new i2cExt_outputCmd();
+			$btn_eco->setName($btn_on_old->getName());
+			$btn_eco->setEqLogic_id($this->getId());
+			$btn_eco->setType('action');
+			$btn_eco->setSubType('other');
+			$btn_eco->setLogicalId('btn_eco');
+			$btn_eco->setEventOnly(1);
+			$btn_eco->setIsHistorized($btn_on_old->getIsHistorized());
+			$btn_eco->setIsVisible($btn_on_old->getIsVisible());
+			$btn_eco->setDisplay('generic_type','ecoort');
+			$btn_eco->save();
+			$btn_eco_old->remove();
+		} elseif ( is_object($btn_eco_old) )
+		{
+			if ( $btn_eco_old->getDisplay('generic_type') == "" )
+			{
+				$btn_eco_old->setDisplay('generic_type','');
+				$btn_eco_old->save();
+			}			
+		}
+		}
+		
+		if (($this->getConfiguration('board')=="IN8R8") OR ($this->getConfiguration('board')=="IN4DIM4")){
         $btn_on_old = $this->getCmd(null, 'btn_on');
         if ( is_object($btn_on_old) && get_class($btn_on_old) != "i2cExt_outputCmd" ) {
             $btn_on = new i2cExt_outputCmd();
@@ -240,6 +399,7 @@ class i2cExt_output extends eqLogic {
 				$btn_off_old->setDisplay('generic_type','LIGHT_OFF');
 				$btn_off_old->save();
 			}			
+		}
 		}
 		if ($this->getConfiguration('board')=="IN4DIM4"){
 		$fade_old = $this->getCmd(null, 'fade');
@@ -462,6 +622,27 @@ class i2cExt_outputCmd extends cmd
 			socket_write($socket, trim($message), strlen(trim($message)));
 			socket_close($socket);
 
+		}
+		else if ( $this->getLogicalId() == 'btn_conf' ) {
+			$message = trim(json_encode(array('apikey' => jeedom::getApiKey('i2cExt'), 'cmd' => 'send','board' => $CARDeqLogic->getConfiguration('board'), 'address' => hexdec($CARDeqLogic->getConfiguration('address')), 'output' => array('channel' => $gceid, 'value' => 'CONF'))));
+			$socket = socket_create(AF_INET, SOCK_STREAM, 0);
+			socket_connect($socket, '127.0.0.1', config::byKey('socketport', 'i2cExt'));
+			socket_write($socket, trim($message), strlen(trim($message)));
+			socket_close($socket);
+		}
+		else if ( $this->getLogicalId() == 'btn_hg' ) {
+			$message = trim(json_encode(array('apikey' => jeedom::getApiKey('i2cExt'), 'cmd' => 'send','board' => $CARDeqLogic->getConfiguration('board'), 'address' => hexdec($CARDeqLogic->getConfiguration('address')), 'output' => array('channel' => $gceid, 'value' => 'HG'))));
+			$socket = socket_create(AF_INET, SOCK_STREAM, 0);
+			socket_connect($socket, '127.0.0.1', config::byKey('socketport', 'i2cExt'));
+			socket_write($socket, trim($message), strlen(trim($message)));
+			socket_close($socket);
+		}
+		else if ( $this->getLogicalId() == 'btn_eco' ) {
+			$message = trim(json_encode(array('apikey' => jeedom::getApiKey('i2cExt'), 'cmd' => 'send','board' => $CARDeqLogic->getConfiguration('board'), 'address' => hexdec($CARDeqLogic->getConfiguration('address')), 'output' => array('channel' => $gceid, 'value' => 'ECO'))));
+			$socket = socket_create(AF_INET, SOCK_STREAM, 0);
+			socket_connect($socket, '127.0.0.1', config::byKey('socketport', 'i2cExt'));
+			socket_write($socket, trim($message), strlen(trim($message)));
+			socket_close($socket);
 		}
 		else
 			return false;
