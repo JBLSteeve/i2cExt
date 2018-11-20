@@ -1,4 +1,4 @@
-    <div class="col-lg-9 eqLogic i2cExt_bouton" style="border-left: solid 1px #EEE; padding-left: 25px;display: none;">
+    <div class="col-lg-9 eqLogic i2cExt_input" style="border-left: solid 1px #EEE; padding-left: 25px;display: none;">
         <form class="form-horizontal">
             <fieldset>
                 <legend>
@@ -6,10 +6,10 @@
 				   <i class='fa fa-cogs eqLogicAction pull-right cursor expertModeVisible' data-action='configure'></i>
                 </legend>
                 <div class="form-group">
-                    <label class="col-lg-2 control-label">{{Nom de l'entrée numérique}}</label>
+                    <label class="col-lg-2 control-label">{{Nom de l'entrée}}</label>
                     <div class="col-lg-3">
                         <input type="text" class="eqLogicAttr form-control" data-l1key="id" style="display : none;" />
-                        <input type="text" class="eqLogicAttr form-control" data-l1key="name" placeholder="{{Nom de l'entrée numérique}}"/>
+                        <input type="text" class="eqLogicAttr form-control" data-l1key="name" placeholder="{{Nom de l'entrée}}"/>
                     </div>
                 </div>
                 <div class="form-group">
@@ -45,11 +45,13 @@
 					<label class="checkbox-inline"><input type="checkbox" class="eqLogicAttr" data-label-text="{{Visible}}" data-l1key="isVisible" checked/>Visible</label>
 					</div>
                 </div>
+
+                
             </fieldset> 
         </form>
 
         <legend>{{Indicateurs}}</legend>
-        <table id="table_cmd_i2cExt_bouton" class="table table-bordered table-condensed i2cExt_bouton">
+        <table id="table_cmd_i2cExt_input" class="table table-bordered table-condensed i2cExt_input">
             <thead>
                 <tr>
                     <th style="width: 50px;">#</th>

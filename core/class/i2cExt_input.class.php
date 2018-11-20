@@ -19,7 +19,7 @@
 /* * ***************************Includes********************************* */
 require_once dirname(__FILE__) . '/../../../../core/php/core.inc.php';
 
-class i2cExt_bouton extends eqLogic {
+class i2cExt_input extends eqLogic {
     /*     * *************************Attributs****************************** */
 
     /*     * ***********************Methode static*************************** */
@@ -27,7 +27,7 @@ class i2cExt_bouton extends eqLogic {
 	{
         $state = $this->getCmd(null, 'state');
         if ( ! is_object($state) ) {
-            $state = new i2cExt_boutonCmd();
+            $state = new i2cExt_inputCmd();
 			$state->setName('Etat');
 			$state->setEqLogic_id($this->getId());
 			$state->setType('info');
@@ -39,13 +39,43 @@ class i2cExt_bouton extends eqLogic {
 			$state->setTemplate('mobile', 'light');
 			$state->save();
 		}
+		$nbimpulsion = $this->getCmd(null, 'nbimpulsion');
+		if ( ! is_object($nbimpulsion) ) {
+            $nbimpulsion = new i2cExt_inputCmd();
+			$nbimpulsion->setName('Nombre d impulsion');
+			$nbimpulsion->setEqLogic_id($this->getId());
+			$nbimpulsion->setType('info');
+			$nbimpulsion->setSubType('numeric');
+			$nbimpulsion->setLogicalId('nbimpulsion');
+			$nbimpulsion->setEventOnly(1);
+			$nbimpulsion->setDisplay('generic_type','GENERIC_INFO');
+			$nbimpulsion->setIsVisible(0);
+			$nbimpulsion->save();
+		}
 	}
 
 	public function preUpdate()
 	{
         $nbimpulsion = $this->getCmd(null, 'nbimpulsion');
-        if ( is_object($nbimpulsion) ) {
-			$nbimpulsion->remove();
+        if ( ! is_object($nbimpulsion) ) {
+            $nbimpulsion = new i2cExt_inputCmd();
+			$nbimpulsion->setName('Nombre d impulsion');
+			$nbimpulsion->setEqLogic_id($this->getId());
+			$nbimpulsion->setType('info');
+			$nbimpulsion->setSubType('numeric');
+			$nbimpulsion->setLogicalId('nbimpulsion');
+			$nbimpulsion->setEventOnly(1);
+			$nbimpulsion->setDisplay('generic_type','GENERIC_INFO');
+			$nbimpulsion->setIsVisible(0);
+			$nbimpulsion->save();
+		}
+		else
+		{
+			if ( $nbimpulsion->getDisplay('generic_type') == "" )
+			{
+				$nbimpulsion->setDisplay('generic_type','GENERIC_INFO');
+				$nbimpulsion->save();
+			}
 		}
         $state = $this->getCmd(null, 'etat');
         if ( is_object($state) ) {
@@ -67,34 +97,37 @@ class i2cExt_bouton extends eqLogic {
 		{
 			$state->setTemplate('mobile', 'light');
 			$state->save();
-		}			
-
+		}	
 	}
 
 	public function preInsert()
 	{
 		$gceid = substr($this->getLogicalId(), strpos($this->getLogicalId(),"_")+2);
-		$this->setEqType_name('i2cExt_bouton');
+		$this->setEqType_name('i2cExt_input');
 		$this->setIsEnable(0);
 		$this->setIsVisible(0);
 	}
 
     public static function event() {
-        $cmd = i2cExt_boutonCmd::byId(init('id'));
+        $cmd = i2cExt_inputCmd::byId(init('id'));
         if (!is_object($cmd)) {
             throw new Exception('Commande ID virtuel inconnu : ' . init('id'));
         }
-		log::add('i2cExt','debug',"Receive push notification for ".$cmd->getName()." (". init('id').") : value = ".init('state'));
+		log::add('i2cExt','debug',"Receive notification for ".$cmd->getName()." (". init('id').") : value = ".init('state'));
 		if ($cmd->execCmd() != $cmd->formatValue(init('state'))) {
 			$cmd->setCollectDate('');
 			$cmd->event(init('state'));
 		}
     }
+    
+    public function getLinkToConfiguration() {
+        return 'index.php?v=d&p=i2cExt&m=i2cExt&id=' . $this->getId();
+    }
 
     /*     * **********************Getteur Setteur*************************** */
 }
 
-class i2cExt_boutonCmd extends cmd 
+class i2cExt_inputCmd extends cmd 
 {
     /*     * *************************Attributs****************************** */
 

@@ -242,8 +242,8 @@ class jeedom_i2c():
 		try:  
 			self.bus = smbus.SMBus(self.port)
 		except:
-			logging.error("Error: Failed to open i2c bus :" + str(self.port))
-
+			logging.error("Error: Failed to open i2c bus:" + str(self.port))
+			return False
 
 	def close(self):
 		logging.debug("Close i2c bus")

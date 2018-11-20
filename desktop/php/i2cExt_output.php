@@ -1,4 +1,4 @@
-    <div class="col-lg-9 eqLogic i2cExt_relai" style="border-left: solid 1px #EEE; padding-left: 25px;display: none;">
+    <div class="col-lg-9 eqLogic i2cExt_output" style="border-left: solid 1px #EEE; padding-left: 25px;display: none;">
         <form class="form-horizontal">
             <fieldset>
                 <legend>
@@ -6,10 +6,10 @@
 				   <i class='fa fa-cogs eqLogicAction pull-right cursor expertModeVisible' data-action='configure'></i>
                 </legend>
                 <div class="form-group">
-                    <label class="col-lg-2 control-label">{{Nom du relai}}</label>
+                    <label class="col-lg-2 control-label">{{Nom de la output}}</label>
                     <div class="col-lg-3">
                         <input type="text" class="eqLogicAttr form-control" data-l1key="id" style="display : none;" />
-                        <input type="text" class="eqLogicAttr form-control" data-l1key="name" placeholder="{{Nom du relai}}"/>
+                        <input type="text" class="eqLogicAttr form-control" data-l1key="name" placeholder="{{Nom de la output}}"/>
                     </div>
                 </div>
                 <div class="form-group">
@@ -45,11 +45,12 @@
 					<label class="checkbox-inline"><input type="checkbox" class="eqLogicAttr" data-label-text="{{Visible}}" data-l1key="isVisible" checked/>Visible</label>
 					</div>
                 </div>
+                				
             </fieldset> 
         </form>
 
         <legend>{{Indicateurs}}</legend>
-        <table id="table_cmd_i2cExt_relai" class="table table-bordered table-condensed i2cExt_relai">
+        <table id="table_cmd_i2cExt_output" class="table table-bordered table-condensed i2cExt_output">
             <thead>
                 <tr>
                     <th style="width: 50px;">#</th>

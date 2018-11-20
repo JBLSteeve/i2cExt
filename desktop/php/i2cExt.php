@@ -18,25 +18,26 @@ $eqLogics = eqLogic::byType('i2cExt');
 						echo '<a class="cursor li_eqLogic" style="display: inline;" data-eqLogic_id="' . $eqLogic->getId() . '" data-eqLogic_type="i2cExt">' . $eqLogic->getName() . '</a>'."\n";
 						echo '<ul id="ul_eqLogic" class="nav nav-list bs-sidenav sub-nav-list" data-eqLogic_id="' . $eqLogic->getId() . '" style="display: none;">'."\n";
 							echo '<li>'."\n";
-								echo '<i class="fa fa-plug cursor eqLogicAction" data-action="hide" data-eqLogic_id="relai_' . $eqLogic->getId() . '"></i>'."\n";
-								echo '<a class="cursor eqLogicAction" data-action="hide" style="display: inline;" data-eqLogic_id="relai_' . $eqLogic->getId() . '" data-eqLogic_type="i2cExt">{{Relai}}</a>'."\n";
-								echo '<ul id="ul_eqLogic" class="nav nav-list bs-sidenav sub-nav-list" data-eqLogic_id="relai_' . $eqLogic->getId() . '" style="display: none;">'."\n";
+								echo '<i class="fa fa-plug cursor eqLogicAction" data-action="hide" data-eqLogic_id="output_' . $eqLogic->getId() . '"></i>'."\n";
+								echo '<a class="cursor eqLogicAction" data-action="hide" style="display: inline;" data-eqLogic_id="output_' . $eqLogic->getId() . '" data-eqLogic_type="i2cExt">{{Sorties}}</a>'."\n";
+								echo '<ul id="ul_eqLogic" class="nav nav-list bs-sidenav sub-nav-list" data-eqLogic_id="output_' . $eqLogic->getId() . '" style="display: none;">'."\n";
 									for ($compteurId = 0; $compteurId <= 7; $compteurId++) {
-										$SubeqLogic = eqLogic::byLogicalId($eqLogic->getId()."_R".$compteurId, 'i2cExt_relai');
+										$SubeqLogic = eqLogic::byLogicalId($eqLogic->getId()."_O".$compteurId, 'i2cExt_output');
 										if ( is_object($SubeqLogic) ) {
-											echo '<li class="cursor li_eqLogic" data-eqLogic_id="' . $SubeqLogic->getId() . '" data-eqLogic_type="i2cExt_relai"><a>' . $SubeqLogic->getName() . '</a></li>'."\n";
+											echo '<li class="cursor li_eqLogic" data-eqLogic_id="' . $SubeqLogic->getId() . '" data-eqLogic_type="i2cExt_output"><a>' . $SubeqLogic->getName() . '</a></li>'."\n";
 										}
 									}
 								echo '</ul>'."\n";
 							echo '</li>'."\n";
+	
 							echo '<li>'."\n";
-								echo '<i class="fa fa-twitch cursor eqLogicAction" data-action="hide" data-eqLogic_id="bouton_' . $eqLogic->getId() . '"></i>'."\n";
-								echo '<a class="cursor eqLogicAction" data-action="hide" style="display: inline;" data-eqLogic_id="bouton_' . $eqLogic->getId() . '" data-eqLogic_type="i2cExt">{{Entrée numérique}}</a>'."\n";
-								echo '<ul id="ul_eqLogic" class="nav nav-list bs-sidenav sub-nav-list" data-eqLogic_id="bouton_' . $eqLogic->getId() . '" style="display: none;">'."\n";
+								echo '<i class="fa fa-twitch cursor eqLogicAction" data-action="hide" data-eqLogic_id="input_' . $eqLogic->getId() . '"></i>'."\n";
+								echo '<a class="cursor eqLogicAction" data-action="hide" style="display: inline;" data-eqLogic_id="input_' . $eqLogic->getId() . '" data-eqLogic_type="i2cExt">{{Entrées}}</a>'."\n";
+								echo '<ul id="ul_eqLogic" class="nav nav-list bs-sidenav sub-nav-list" data-eqLogic_id="input_' . $eqLogic->getId() . '" style="display: none;">'."\n";
 									for ($compteurId = 0; $compteurId <= 7; $compteurId++) {
-										$SubeqLogic = eqLogic::byLogicalId($eqLogic->getId()."_B".$compteurId, 'i2cExt_bouton');
+										$SubeqLogic = eqLogic::byLogicalId($eqLogic->getId()."_I".$compteurId, 'i2cExt_input');
 										if ( is_object($SubeqLogic) ) {
-											echo '<li class="cursor li_eqLogic" data-eqLogic_id="' . $SubeqLogic->getId() . '" data-eqLogic_type="i2cExt_bouton"><a>' . $SubeqLogic->getName() . '</a></li>'."\n";
+											echo '<li class="cursor li_eqLogic" data-eqLogic_id="' . $SubeqLogic->getId() . '" data-eqLogic_type="i2cExt_input"><a>' . $SubeqLogic->getName() . '</a></li>'."\n";
 										}
 									}
 								echo '</ul>'."\n";
@@ -140,23 +141,25 @@ $eqLogics = eqLogic::byType('i2cExt');
         	   <div class="form-group">
                 	<label class="col-sm-3 control-label">{{Modèle de la carte}}</label>
 					<div class="col-sm-3">
-                        <select class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="board">
-                            <option value="" id="select_board">Aucune</option>
-                            <option value="8IN8R" id="select_board">IN8R8</option>
-							<option value="IN4DIM4" id="select_board">IN4DIM4</option>
+                        <select class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="board"
+                          onchange="if(this.selectedIndex == 0) document.getElementById('i2cExt_address').style.display = 'none';
+					 	 	else document.getElementById('i2cExt_address').style.display = 'block';">
+                            <option value="" >Aucune</option>
+                            <option value="IN8P4" >IN8P4</option>
+                            <option value="IN8R8" >IN8R8</option>
+							<option value="IN4DIM4" >IN4DIM4</option>
                         </select>
                     </div>
                 </div>
-				<div class="form-group">
-					<label class="col-sm-3 control-label" >{{Adresse I2C de la carte}}</label>
-					<div class="col-sm-2">
-					   <select class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="address">
-					   		<option value="" id="select_i2c_board"></option>
-							<option value="83" id="select_i2c_board">0x53 (83)</option>
-							<option value="84" id="select_i2c_board">0x54 (33)</option>
-						</select>
-					</div>
-				</div>
+				<div id="i2cExt_address">
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" >{{Adresse I2C de la carte}}</label>
+                        <div class="col-sm-2">
+                            <select id="eqType" class="eqLogicAttr form-control cursor" data-l1key="configuration" data-l2key="address">
+                            </select>
+                        </div>
+                    </div>
+                </div>
             </fieldset> 
         </form>
 
@@ -188,8 +191,8 @@ $eqLogics = eqLogic::byType('i2cExt');
         </form>
 
     </div>
-	<?php include_file('desktop', 'i2cExt_bouton', 'php', 'i2cExt'); ?>
-	<?php include_file('desktop', 'i2cExt_relai', 'php', 'i2cExt'); ?>
+	<?php include_file('desktop', 'i2cExt_input', 'php', 'i2cExt'); ?>
+	<?php include_file('desktop', 'i2cExt_output', 'php', 'i2cExt'); ?>
 </div>
 
 <?php
