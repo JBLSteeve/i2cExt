@@ -46,7 +46,7 @@ class i2cExt_output extends eqLogic {
 			$state->setLogicalId('state');
 			$state->setEventOnly(1);
 			if ($this->getConfiguration('board')=="IN8P4"){
-				$state->setDisplay('generic_type','');
+				$state->setDisplay('generic_type','HEATING_STATE');
 				$state->setTemplate('dashboard', 'heatPiloteWire');
 				$state->setTemplate('mobile', 'heatPiloteWire');  
 			}
@@ -232,7 +232,7 @@ class i2cExt_output extends eqLogic {
 			$state->setIsHistorized($state_old->getIsHistorized());
 			$state->setIsVisible($state_old->getIsVisible());
 			if ($this->getConfiguration('board')=="IN8P4"){
-				$state->setDisplay('generic_type','');
+				$state->setDisplay('generic_type','HEATING_STATE');
 				$state->setTemplate('dashboard', 'heatPiloteWire');
 				$state->setTemplate('mobile', 'heatPiloteWire');  
 			}

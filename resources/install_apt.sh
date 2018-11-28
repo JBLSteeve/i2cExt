@@ -10,7 +10,9 @@ echo "*             Installation des dépendances             *"
 echo "********************************************************"
 apt-get update
 echo 50 > ${PROGRESS_FILE}
-apt-get install -y python-smbus python-requests python-pyudev
+apt-get install -y python-smbus python-requests python-pyudev i2c-tools
+echo 80 > ${PROGRESS_FILE}
+modprobe aml_i2c
 echo 100 > ${PROGRESS_FILE}
 echo "********************************************************"
 echo "*             Installation terminée                    *"

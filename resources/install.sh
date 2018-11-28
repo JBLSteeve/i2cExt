@@ -11,7 +11,7 @@ echo "aml_i2c" | sudo tee /etc/modules
 echo 30 > /tmp/dependancy_i2cExt_in_progress
 apt-get update
 echo 50 > /tmp/dependancy_i2cExt_in_progress
-apt-get install -y python-smbus python-requests python-pyudev
+apt-get install -y python-smbus python-requests python-pyudev i2c-tools
 echo 100 > /tmp/dependancy_i2cExt_in_progress
 echo "********************************************************"
 echo "*             Installation terminée                    *"
