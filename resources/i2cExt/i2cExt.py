@@ -182,7 +182,7 @@ class IN8P4(CARDS):
 			self.inputChanged=0
 			
 		else :
-			raise ValueError("The address " + str(_cardAddress) + " is not an IN8P4 card")	
+			raise ValueError("The address " + str(_cardAddress) + " is not an IN8P4 card")
 			
 # output methodes
 	# status of the output setpoint
@@ -541,8 +541,14 @@ def read_socket():
 		if not JEEDOM_SOCKET_MESSAGE.empty():
 			message = json.loads(jeedom_utils.stripped(JEEDOM_SOCKET_MESSAGE.get()))
 			logging.debug("message : " + str(message))
-			address = int(message['address'])
-			board=str(message['board'])
+			if message['address'] == none:
+				raise KeyError()
+			else:
+				address = int(message['address'])
+			if message['board'] == none:
+				raise KeyError()
+			else:
+				board=str(message['board'])
 			
 			if message['apikey'] != _apikey:
 				raise KeyError()
@@ -601,11 +607,14 @@ def read_socket():
 								
 	except TypeError as te:
 		logging.error('Error on read socket : '+ str(te) + str(message))
+		shutdown()
 	except KeyError as ke:
 		logging.error("Invalid apikey from socket : " + str(ke) + " message :" + str(message))
+		shutdown()
 	#Catch all other exception and print exception name raised
 	except:
 		logging.error('Other error on read socket : '+ str(sys.exc_info()[0]))	
+		shutdown()
 # ----------------------------------------------------------------------------
 def read_i2cbus():
 	for eqt in Eqts:		# Loop for each boards
@@ -639,6 +648,7 @@ def write_socket(type,address,board,channelid,value):	#type=input or output or s
 		
 	except Exception:
 		logging.error("Send to jeedom error for channel " +str(type) + " id :" + str(channelid) + " on board @:" + str(address))
+		shutdown()
 				
 # ----------------------------------------------------------------------------	
 def cards_hbeat(hbeat):
