@@ -17,7 +17,7 @@
  */
 
 /* * ***************************Includes********************************* */
-require_once dirname(__FILE__) . '/../../../../core/php/core.inc.php';
+require_once __DIR__ . '/../../../../core/php/core.inc.php';
 
 class i2cExt_input extends eqLogic {
     /*     * *************************Attributs****************************** */
@@ -68,11 +68,8 @@ class i2cExt_input extends eqLogic {
 			$nbimpulsion->setDisplay('generic_type','GENERIC_INFO');
 			$nbimpulsion->setIsVisible(0);
 			$nbimpulsion->save();
-		}
-		else
-		{
-			if ( $nbimpulsion->getDisplay('generic_type') == "" )
-			{
+		} else {
+			if ( $nbimpulsion->getDisplay('generic_type') == "" ){
 				$nbimpulsion->setDisplay('generic_type','GENERIC_INFO');
 				$nbimpulsion->save();
 			}
@@ -99,8 +96,8 @@ class i2cExt_input extends eqLogic {
 			$state->save();
 		}	
 	}
-
-	public function preInsert()
+	
+    public function preInsert()
 	{
 		$gceid = substr($this->getLogicalId(), strpos($this->getLogicalId(),"_")+2);
 		$this->setEqType_name('i2cExt_input');
@@ -151,7 +148,7 @@ class i2cExt_inputCmd extends cmd
                     if ($_value == 'up') {
                         $_value = 0;
                     }
-					if ((is_numeric(intval($_value)) && intval($_value) > 1) || $_value || $_value == 1) {
+		    if ((is_numeric(intval($_value)) && intval($_value) > 1) || $_value || $_value == 1) {
                         $_value = 1;
                     }
                     return $_value;
@@ -167,13 +164,10 @@ class i2cExt_inputCmd extends cmd
 			if ( $btn_on->getIsVisible() )
 			{
 				$type = 'DevSwitch'; // Le type Imperihome qui correspond le mieux à la commande
-			}
-			else
-			{
+			} else {
 				$type = 'DevDoor'; // Le type Imperihome qui correspond le mieux à la commande
 			}
-		}
-		else {
+		} else {
 			return $info_device;
 		}
 		$object = $eqLogic->getObject(); // Récupération de l'objet de l'équipement
@@ -188,14 +182,11 @@ class i2cExt_inputCmd extends cmd
 		);
 		#$info_device['params'] = $ISSStructure[$info_device['type']]['params']; // Ici on vient copier la structure type: laisser ce code
 
-		if ( $btn_on->getIsVisible() )
-		{
+		if ( $btn_on->getIsVisible() ){
 			array_push ($info_device['params'], array("value" =>  '#' . $eqLogic->getCmd(null, 'state')->getId() . '#', "key" => "status", "type" => "infoBinary", "Description" => "Current status : 1 = On / 0 = Off"));
 			$info_device['actions']["setStatus"]["item"]["0"] = $eqLogic->getCmd(null, 'btn_off')->getId();
 			$info_device['actions']["setStatus"]["item"]["1"] = $eqLogic->getCmd(null, 'btn_on')->getId();
-		}
-		else
-		{
+		} else {
 			array_push ($info_device['params'], array("value" =>  '#' . $eqLogic->getCmd(null, 'state')->getId() . '#', "key" => "tripped", "type" => "infoBinary", "Description" => "Is the sensor tripped ? (0 = No / 1 = Tripped)"));
 			array_push ($info_device['params'], array("value" =>  '0', "key" => "armable", "type" => "infoBinary", "Description" => "Ability to arm the device : 1 = Yes / 0 = No"));
 			array_push ($info_device['params'], array("value" =>  '0', "key" => "ackable", "type" => "infoBinary", "Description" => "Ability to acknowledge alerts : 1 = Yes / 0 = No"));
@@ -204,4 +195,4 @@ class i2cExt_inputCmd extends cmd
 		return $info_device;
 	}
 }
-?>
+
