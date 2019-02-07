@@ -60,7 +60,7 @@ class CARDS(object):
 		self.address=_cardAddress
 		self.hbeat=0
 		self._status=0
-		self._status=self.manageHbeat(0)	
+		self._status=self.manageHbeat(0)
 		self.version=self.aboutVersion()
 		#logging.debug("Create the class CARDS for the device with @:" + str(_cardAddress))
 		
@@ -161,7 +161,6 @@ class CARDS(object):
 class IN8P4(CARDS):
 	def __init__(self, _cardAddress,_board,_reply_input):
 		if ((_cardAddress > 66) & (_cardAddress < 83)):
-			super(IN8P4,self).__init__(_cardAddress,_board) #appel du constructeur de la classe parent (a verifier)
 			# IN8P4 Registers
 			self.W_OUTPUT=66 #0x42
 			self.R_OUTPUT=65 #0x41
@@ -181,6 +180,8 @@ class IN8P4(CARDS):
 			self.outputChanged=0
 			self.inputChanged=0
 			
+			super(IN8P4,self).__init__(_cardAddress,_board) #appel du constructeur de la classe parent 
+
 		else :
 			raise ValueError("The address " + str(_cardAddress) + " is not an IN8P4 card")
 			
@@ -290,8 +291,7 @@ class IN8P4(CARDS):
 # ------------------------------------------------------------------------------			
 class IN8R8(CARDS):
 	def __init__(self, _cardAddress,_board,_reply_input):
-		if ((_cardAddress > 82) & (_cardAddress < 100)):
-			super(IN8R8,self).__init__(_cardAddress,_board) #appel du constructeur de la classe parent (a verifier)
+		if ((_cardAddress > 82) & (_cardAddress < 100)):		
 			# IN8R8 Registers
 			self.W_OUTPUT=66 #0x42
 			self.R_OUTPUT=65 #0x41
@@ -309,6 +309,8 @@ class IN8R8(CARDS):
 			self.routputChanged=[False,False,False,False,False,False,False,False] #A supprimer non utilise
 			self.outputChanged=0
 			self.inputChanged=0
+			
+			super(IN8R8,self).__init__(_cardAddress,_board) #appel du constructeur de la classe parent 
 			
 		else :
 			raise ValueError("The address " + str(_cardAddress) + " is not an IN8R8 card")	
@@ -399,7 +401,6 @@ class IN8R8(CARDS):
 class IN4DIM4(CARDS):
 	def __init__(self, _cardAddress,_board,_reply_input):
 		if ((_cardAddress > 39) & (_cardAddress < 57)):
-			super(IN4DIM4,self).__init__(_cardAddress,_board)  #appel du constructeur de la classe parent (a verifier)
 			# IN4DIM4 Registers
 			self.W_OUTPUT=[7,23,39,55] #0x07,0x17,0x27,0x37,0x47
 			self.W_FADE=[8,24,40,56]  #0x08,0x18,0x28,0x38,0x48
@@ -426,8 +427,8 @@ class IN4DIM4(CARDS):
 			#self.setpoint=[0, 0, 0, 0]
 			#self.fade=[0, 0, 0, 0]
 			
-
-		
+			super(IN4DIM4,self).__init__(_cardAddress,_board)  #appel du constructeur de la classe parent 
+			
 		else :
 			raise ValueError("The address " + str(_cardAddress) + " is not an IN4DIM4 card")	
 # output methodes
@@ -535,36 +536,29 @@ def findCardAdress(_address):
 	
 # ----------------------------------------------------------------------------			
 def read_socket():
-
 	try:
 		global JEEDOM_SOCKET_MESSAGE
 		if not JEEDOM_SOCKET_MESSAGE.empty():
 			message = json.loads(jeedom_utils.stripped(JEEDOM_SOCKET_MESSAGE.get()))
 			logging.debug("message : " + str(message))
-			if message['address'] == none:
-				raise KeyError()
-			else:
-				address = int(message['address'])
-			if message['board'] == none:
-				raise KeyError()
-			else:
-				board=str(message['board'])
-			
-			if message['apikey'] != _apikey:
-				raise KeyError()
-						
- 			
-			card=findCardAdress(address)
 
+			if message['address'] :
+				address = int(message['address'])
+			
+			if message['board'] :
+				board=str(message['board'])
+									
+			card=findCardAdress(address)
+			
 			if card == None:
 				if message['cmd'] == 'add':
-					#logging.debug("Add the device with @:" + str(address)) 
+					logging.debug("Add the device with @:" + str(address)) 
 					if message['board'] == 'IN8P4':
 						Eqts.append(IN8P4(address,board,[False,False,False,False,False,False,False,False]))
 					if message['board'] == 'IN8R8':
 						Eqts.append(IN8R8(address,board,[False,False,False,False,False,False,False,False]))
 					if message['board'] == 'IN4DIM4':
-						Eqts.append(IN4DIM4(address,board,[0,0,0,0]))
+						Eqts.append(IN4DIM4(address,board,[False,False,False,False]))
 			
 			else:
 				if message['cmd'] == 'receive':
@@ -643,7 +637,7 @@ def write_socket(type,address,board,channelid,value):	#type=input or output or s
 		
 	try:
 		globals.JEEDOM_COM.add_changes('devices::'+message['address'],message)
-		globals.JEEDOM_COM.add_changes(str(type) + '::',status)
+		globals.JEEDOM_COM.add_changes(str(type) + '::'+message['address'],status)
 
 		
 	except Exception:
