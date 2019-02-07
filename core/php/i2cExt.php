@@ -26,6 +26,8 @@ if (isset($_GET['test'])) {
 	echo 'OK';
 	die();
 }
+log::add('i2cExt','debug','json :' . file_get_contents("php://input"));
+
 $result = json_decode(file_get_contents("php://input"), true);
 if (!is_array($result)) {
 	die();
